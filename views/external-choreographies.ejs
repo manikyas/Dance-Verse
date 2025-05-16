@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/styles/main.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .container {
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    .btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      color: #fff;
+      background: #ff7e5f;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #feb47b;
+    }
+    .songs-container, .choreographies-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .song, .choreography {
+      background: #fff;
+      color: #333;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      max-width: 200px;
+    }
+    .song img, .choreography img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .song h3, .choreography h3 {
+      font-size: 1rem;
+      margin: 10px 0;
+    }
+    .search-bar {
+      margin: 20px auto;
+      text-align: center;
+    }
+    .search-bar input {
+      padding: 10px;
+      width: 300px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    .search-bar button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background: #ff7e5f;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .search-bar button:hover {
+      background: #feb47b;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= title %></h1>
+  <div class="container">
+    <h2>Select a Song for Dance Ratings</h2>
+    <div class="search-bar">
+      <form action="/external/choreographies" method="GET">
+        <input type="text" name="query" placeholder="Search for a song..." value="<%= query || '' %>">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <div class="songs-container">
+      <% songs.forEach(song => { %>
+        <div class="song">
+          <img src="<%= song.thumbnail %>" alt="<%= song.title %>">
+          <h3><%= song.title %></h3>
+          <p>Artist: <%= song.artist %></p>
+          <a href="/choreographies?songId=<%= song.id %>" class="btn">Select</a>
+        </div>
+      <% }) %>
+    </div>
+    <h2>Trending Songs</h2>
+    <div class="songs-container">
+      <% trendingSongs.forEach(song => { %>
+        <div class="song">
+          <img src="<%= song.thumbnail %>" alt="<%= song.title %>">
+          <h3><%= song.title %></h3>
+          <a href="<%= song.link %>" target="_blank" class="btn">Play</a>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+  <div class="choreographies-container">
+    <% choreographies.forEach(choreography => { %>
+      <div class="choreography">
+        <img src="<%= choreography.thumbnail %>" alt="<%= choreography.title %>">
+        <h3><%= choreography.title %></h3>
+        <a href="https://www.youtube.com/watch?v=<%= choreography.videoId %>" target="_blank">Watch</a>
+      </div>
+    <% }) %>
+  </div>
+</body>
+</html>

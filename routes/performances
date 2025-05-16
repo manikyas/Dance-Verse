@@ -1,0 +1,41 @@
+const express = require('express');
+const router = express.Router();
+const { MongoClient } = require('mongodb');
+
+// MongoDB connection setup
+const uri = 'mongodb://localhost:27017';
+const client = new MongoClient(uri);
+const dbName = 'danceapp';
+
+// Submit a performance
+router.post('/submit', async (req, res) => {
+  const { userId, choreographyId, score, feedback } = req.body;
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    await db.collection('performances').insertOne({ userId, choreographyId, score, feedback });
+    res.send('Performance submitted successfully!');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error submitting performance');
+  } finally {
+    await client.close();
+  }
+});
+
+// Get all performances
+router.get('/', async (req, res) => {
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const performances = await db.collection('performances').find().toArray();
+    res.render('performances', { title: 'Performances', performances });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching performances');
+  } finally {
+    await client.close();
+  }
+});
+
+module.exports = router;

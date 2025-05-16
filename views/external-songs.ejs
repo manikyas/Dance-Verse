@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <div class="songs-container">
+    <% songs.forEach(song => { %>
+      <div class="song">
+        <h3><%= song.title %></h3>
+        <p>Artist: <%= song.artist %></p>
+        <p>Album: <%= song.album %></p>
+        <% if (song.previewUrl) { %>
+          <a href="<%= song.previewUrl %>" target="_blank">Preview</a>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+const express = require('express');
+const router = express.Router();
+const { MongoClient } = require('mongodb');
+
+// MongoDB connection setup
+const uri = 'mongodb://localhost:27017';
+const client = new MongoClient(uri);
+const dbName = 'danceapp';
+
+// Get all choreographies
+router.get('/', async (req, res) => {
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const choreographies = await db.collection('choreographies').find().toArray();
+    res.render('choreographies', { title: 'Choreographies', choreographies });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching choreographies');
+  } finally {
+    await client.close();
+  }
+});
+
+// Add a new choreography
+router.post('/add', async (req, res) => {
+  const { songId, steps, duration } = req.body;
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    await db.collection('choreographies').insertOne({ songId, steps, duration });
+    res.redirect('/choreographies');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error adding choreography');
+  } finally {
+    await client.close();
+  }
+});
+
+module.exports = router;

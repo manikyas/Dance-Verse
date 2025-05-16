@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error</title>
+  <link rel="stylesheet" href="/styles/main.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .error-container {
+      margin: 50px auto;
+      max-width: 600px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 1.2rem;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background: #ff7e5f;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    a:hover {
+      background: #feb47b;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <h1>Oops! Something went wrong.</h1>
+    <p><%= error || 'An unexpected error occurred.' %></p>
+    <a href="/">Go Back to Home</a>
+  </div>
+</body>
+</html>
