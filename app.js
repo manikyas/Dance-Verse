@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 
 mongoose.connect('mongodb://localhost:27017/danceapp')
   .then(() => console.log('MongoDB connected'))
@@ -17,14 +18,32 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: 'danceverse_secret',
+  resave: false,
+  saveUninitialized: true,
+}));
 
 // Set EJS as the template engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Import routes
+// Middleware to check if the user is logged in
+function checkAuth(req, res, next) {
+  if (req.session && req.session.user) {
+    next(); // User is authenticated, proceed to the next middleware/route
+  } else {
+    res.redirect('/auth/login'); // Redirect to login page if not authenticated
+  }
+}
+
+// Import auth routes
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
+// Protect the home page and other routes
 const indexRoutes = require('./routes/index');
-app.use('/', indexRoutes);
+app.use('/', checkAuth, indexRoutes);
 
 // Import additional routes
 const songRoutes = require('./routes/songs');

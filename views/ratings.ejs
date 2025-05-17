@@ -78,7 +78,7 @@
         <img src="<%= song.thumbnail %>" alt="<%= song.title %>">
         <h3><%= song.title %></h3>
         <p>Artist: <%= song.artist %></p>
-        <a href="/choreographies?songId=<%= song.id %>" class="btn">Select</a>
+        <a href="/choreographies?songTitle=<%= encodeURIComponent(song.title) %>" class="btn">View Choreographies</a>
       </div>
     <% }) %>
   </div>

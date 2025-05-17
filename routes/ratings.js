@@ -45,32 +45,51 @@ router.get('/choreographies', async (req, res) => {
   try {
     const songTitle = req.query.songTitle; // Get the selected song title from the query
     if (!songTitle) {
-      return res.render('choreographies', { title: 'Choreographies', choreographies: [] });
+      return res.render('choreographies', { title: 'Choreographies', choreographies: [], message: 'No song selected.' });
     }
 
     const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-    // Fetch choreographies from YouTube
-    const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+    // Fetch choreographies for the selected song
+    let response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
       params: {
         part: 'snippet',
         q: `${songTitle} dance choreography`,
         type: 'video',
-        maxResults: 20, // Fetch up to 20 choreographies
+        maxResults: 10,
         key: YOUTUBE_API_KEY,
       },
     });
 
-    const choreographies = response.data.items.map(item => ({
+    let choreographies = response.data.items.map(item => ({
       title: item.snippet.title,
       videoId: item.id.videoId,
-      thumbnail: item.snippet.thumbnails.high.url, // Use high-quality thumbnails
+      thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
     }));
 
-    res.render('choreographies', { title: `Choreographies for ${songTitle}`, choreographies });
+    // If no choreographies are found, fetch choreographies for similar songs
+    if (choreographies.length === 0) {
+      response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+        params: {
+          part: 'snippet',
+          q: 'popular dance choreographies',
+          type: 'video',
+          maxResults: 10,
+          key: YOUTUBE_API_KEY,
+        },
+      });
+
+      choreographies = response.data.items.map(item => ({
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+      }));
+    }
+
+    res.render('choreographies', { title: `Choreographies for ${songTitle}`, choreographies, message: choreographies.length ? '' : 'No exact matches found. Showing similar choreographies.' });
   } catch (err) {
     console.error('Error fetching choreographies:', err.message);
-    res.render('choreographies', { title: 'Choreographies', choreographies: [] });
+    res.render('choreographies', { title: 'Choreographies', choreographies: [], message: 'An error occurred while fetching choreographies.' });
   }
 });
 

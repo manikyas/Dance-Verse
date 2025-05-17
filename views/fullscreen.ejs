@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #000;
+    }
+    iframe {
+      width: 90%;
+      height: 90%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <iframe 
+    src="https://www.youtube.com/embed/<%= videoId %>?autoplay=1" 
+    allowfullscreen>
+  </iframe>
+</body>
+</html>
