@@ -63,6 +63,16 @@ app.use('/ratings', ratingsRoutes);
 const externalRoutes = require('./routes/external');
 app.use('/external', externalRoutes);
 
+// Route to render the play page
+app.get('/play', (req, res) => {
+  res.render('play', { title: 'Play Video', videoId: 'your_video_id_here' });
+});
+
+// Route to render the camera page
+app.get('/camera', (req, res) => {
+  res.render('camera');
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Page Not Found' });

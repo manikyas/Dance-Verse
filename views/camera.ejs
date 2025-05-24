@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    video {
+      width: 80%;
+      max-width: 600px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background: linear-gradient(45deg, #ff7e5f, #feb47b);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      background: linear-gradient(45deg, #feb47b, #ff7e5f);
+    }
+  </style>
+</head>
+<body>
+  <h1>Camera</h1>
+  <video id="camera" autoplay></video>
+  <div class="controls">
+    <button class="btn" onclick="stopCamera()">Stop Camera</button>
+  </div>
+
+  <script>
+    const video = document.getElementById('camera');
+
+    // Start the camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        video.srcObject = stream;
+        window.cameraStream = stream; // Save the stream to stop it later
+        console.log('Camera started successfully.');
+      })
+      .catch((err) => {
+        alert('Unable to access the camera. Please check your permissions.');
+        console.error('Camera error:', err);
+      });
+
+    // Stop the camera
+    function stopCamera() {
+      if (window.cameraStream) {
+        const tracks = window.cameraStream.getTracks();
+        tracks.forEach((track) => track.stop());
+        alert('Camera stopped.');
+        console.log('Camera stopped successfully.');
+      }
+    }
+  </script>
+</body>
+</html>

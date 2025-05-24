@@ -117,7 +117,7 @@
     }
 
     .confirm-btn {
-      background: #ff7e5f;
+      background: #8c5fff;
       color: #fff;
       font-weight: bold;
       width: 100%;
@@ -173,19 +173,20 @@
   </div>
 
   <div id="timeSelectionModal" class="time-selection-modal">
-    <h3>Select Dance Time Range</h3>
+    <h3>Select Time Range for Recording</h3>
     <div class="time-inputs">
       <div class="time-input">
-        <label>Start Time (sec)</label>
+        <label for="startTime">Select Start Time (seconds)</label>
         <input type="number" id="startTime" min="0" value="0" placeholder="Enter start time">
       </div>
       <div class="time-input">
-        <label>End Time (sec)</label>
+        <label for="endTime">Select End Time (seconds)</label>
         <input type="number" id="endTime" min="1" value="60" placeholder="Enter end time">
       </div>
     </div>
     <div class="modal-buttons">
-      <button class="modal-btn confirm-btn" onclick="confirmTime()">Confirm Time Range</button>
+      <button class="modal-btn confirm-btn" onclick="confirmTime()">Confirm Timings</button>
+      <button class="modal-btn cancel-btn" onclick="closeModal()">Cancel</button>
     </div>
   </div>
 
@@ -202,14 +203,22 @@
       const startTime = document.getElementById('startTime').value;
       const endTime = document.getElementById('endTime').value;
 
-      if (parseInt(startTime) >= parseInt(endTime)) {
-        alert('Start time must be less than end time');
+      if (!startTime || !endTime) {
+        alert('Please select both start and end times.');
+        console.log('Start or end time is missing.');
         return;
       }
 
-      // Store selected time range and redirect to camera
+      if (parseInt(startTime) >= parseInt(endTime)) {
+        alert('Start time must be less than end time.');
+        console.log('Invalid time range: Start time >= End time.');
+        return;
+      }
+
+      // Confirm selected time range and redirect to camera
+      console.log(`Timings confirmed: Start Time - ${startTime}s, End Time - ${endTime}s`);
       localStorage.setItem('danceTimeRange', JSON.stringify({ startTime, endTime }));
-      window.location.href = '/camera';
+      window.location.href = '/camera'; // Redirect to the camera page
     }
   </script>
 </body>
