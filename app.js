@@ -41,23 +41,27 @@ function checkAuth(req, res, next) {
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
+// Allow public access to certain routes without authentication
+const songRoutes = require('./routes/songs');
+const choreographyRoutes = require('./routes/choreographies');
+app.use('/songs', songRoutes);
+app.use('/choreographies', choreographyRoutes);
+
 // Protect the home page and other routes
 const indexRoutes = require('./routes/index');
 app.use('/', checkAuth, indexRoutes);
 
 // Import additional routes
-const songRoutes = require('./routes/songs');
-const choreographyRoutes = require('./routes/choreographies');
 const performanceRoutes = require('./routes/performances');
 const battleRoutes = require('./routes/battles');
 const ratingsRoutes = require('./routes/ratings');
+const cameraRoutes = require('./routes/camera');
 
-// Use additional routes
-app.use('/songs', songRoutes);
-app.use('/choreographies', choreographyRoutes);
-app.use('/performances', performanceRoutes);
-app.use('/battles', battleRoutes);
-app.use('/ratings', ratingsRoutes);
+// Use additional routes (these require authentication)
+app.use('/performances', checkAuth, performanceRoutes);
+app.use('/battles', checkAuth, battleRoutes);
+app.use('/ratings', checkAuth, ratingsRoutes);
+app.use('/camera', checkAuth, cameraRoutes);
 
 // Import external API routes
 const externalRoutes = require('./routes/external');

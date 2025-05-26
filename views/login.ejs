@@ -3,18 +3,514 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
+  <title><%= title %> - DanceVerse</title>
   <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Righteous&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      position: relative;
+    }
+    
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e, #ffb92a, #5f8fff, #7d4cdb);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      z-index: -2;
+      opacity: 0.6;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50% }
+      50% { background-position: 100% 50% }
+      100% { background-position: 0% 50% }
+    }
+    
+    .texture-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="none"/><path d="M0 0L100 100ZM100 0L0 100Z" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
+      z-index: -1;
+    }
+    
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 40px 20px;
+    }
+    
+    .logo {
+      margin-bottom: 30px;
+      font-family: 'Righteous', cursive;
+      font-size: 3rem;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e, #ffb92a, #5f8fff);
+      background-size: 300% 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: shimmer 4s infinite linear;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 0% 50% }
+      50% { background-position: 100% 50% }
+      100% { background-position: 0% 50% }
+    }
+    
+    .login-form-container {
+      width: 100%;
+      max-width: 450px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.6s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .login-form-container:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, #ff3b5c, #ff713e, #ffb92a, #5f8fff, #7d4cdb);
+      animation: borderAnimation 3s linear infinite;
+      background-size: 200% auto;
+    }
+    
+    @keyframes borderAnimation {
+      0% { background-position: 0 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    h1 {
+      margin: 0 0 30px;
+      font-size: 2.5rem;
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    .form-group {
+      position: relative;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 20px 20px 15px 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      font-size: 16px;
+      color: #fff;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+    
+    .form-group i {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: #fff;
+      font-size: 20px;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    
+    .form-control:focus + i {
+      color: #ffb92a;
+      opacity: 1;
+    }
+    
+    label {
+      position: absolute;
+      top: 10px;
+      left: 50px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      pointer-events: none;
+      font-weight: 500;
+    }
+    
+    .btn-submit {
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      border: none;
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 15px;
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-submit:after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(45deg);
+      transition: all 0.5s ease;
+      opacity: 0;
+    }
+    
+    .btn-submit:hover:after {
+      opacity: 1;
+      transform: rotate(45deg) translate(50%, 50%);
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 25px 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .divider:before, .divider:after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .divider:before {
+      margin-right: 15px;
+    }
+    
+    .divider:after {
+      margin-left: 15px;
+    }
+    
+    .social-login {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .social-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      color: #fff;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .facebook {
+      background: rgba(59, 89, 152, 0.7);
+    }
+    
+    .google {
+      background: rgba(219, 68, 55, 0.7);
+    }
+    
+    .twitter {
+      background: rgba(29, 161, 242, 0.7);
+    }
+    
+    .social-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      background-opacity: 1;
+    }
+    
+    .signup-link {
+      text-align: center;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 30px;
+    }
+    
+    .signup-link a {
+      color: #ffb92a;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .signup-link a:hover {
+      color: #ff3b5c;
+      text-decoration: underline;
+    }
+    
+    .back-home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      margin-top: 30px;
+      transition: all 0.3s ease;
+    }
+    
+    .back-home i {
+      margin-right: 8px;
+    }
+    
+    .back-home:hover {
+      color: #fff;
+      transform: translateX(-5px);
+    }
+    
+    /* Beat animation for the logo */
+    .beat {
+      display: inline-block;
+      animation: beat 1.5s ease infinite;
+    }
+    
+    @keyframes beat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.1); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.1); }
+      70% { transform: scale(1); }
+    }
+    
+    /* Floating music notes decoration */
+    .decoration {
+      position: absolute;
+      z-index: -1;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    
+    .note-1 {
+      top: 20%;
+      left: 10%;
+      font-size: 4rem;
+      animation: float 9s ease-in-out infinite;
+    }
+    
+    .note-2 {
+      top: 15%;
+      right: 15%;
+      font-size: 3rem;
+      animation: float 11s ease-in-out infinite;
+    }
+    
+    .note-3 {
+      bottom: 15%;
+      left: 15%;
+      font-size: 3.5rem;
+      animation: float 10s ease-in-out infinite;
+    }
+    
+    .note-4 {
+      bottom: 20%;
+      right: 10%;
+      font-size: 4.5rem;
+      animation: float 12s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .login-form-container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+      
+      .form-control {
+        padding: 15px 15px 12px 45px;
+      }
+      
+      .logo {
+        font-size: 2.5rem;
+      }
+      
+      .decoration {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Login</h1>
-  <form action="/auth/login" method="POST">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-    <button type="submit">Login</button>
-  </form>
-  <p>Don't have an account? <a href="/auth/signup">Sign up here</a>.</p>
+  <div class="page-wrapper">
+    <div class="background"></div>
+    <div class="texture-overlay"></div>
+    
+    <!-- Decorative elements -->
+    <i class="fas fa-music decoration note-1"></i>
+    <i class="fas fa-music decoration note-2"></i>
+    <i class="fas fa-compact-disc decoration note-3"></i>
+    <i class="fas fa-headphones decoration note-4"></i>
+    
+    <div class="main-container">
+      <div class="logo">Dance<span class="beat">Verse</span></div>
+      
+      <div class="login-form-container">
+        <h1>Login to Your Account</h1>
+        
+        <form action="/auth/login" method="POST">
+          <div class="form-group">
+            <input type="text" id="username" name="username" class="form-control" required>
+            <label for="username">Username</label>
+            <i class="fas fa-user"></i>
+          </div>
+          
+          <div class="form-group">
+            <input type="password" id="password" name="password" class="form-control" required>
+            <label for="password">Password</label>
+            <i class="fas fa-lock"></i>
+          </div>
+          
+          <button type="submit" class="btn-submit">
+            Login <i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+        
+        <div class="divider">or continue with</div>
+        
+        <div class="social-login">
+          <div class="social-btn facebook">
+            <i class="fab fa-facebook-f"></i>
+          </div>
+          <div class="social-btn google">
+            <i class="fab fa-google"></i>
+          </div>
+          <div class="social-btn twitter">
+            <i class="fab fa-twitter"></i>
+          </div>
+        </div>
+        
+        <div class="signup-link">
+          Don't have an account? <a href="/auth/signup">Sign up</a>
+        </div>
+      </div>
+      
+      <a href="/" class="back-home">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Add some simple animations and interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+      // Focus animation for form fields
+      const formControls = document.querySelectorAll('.form-control');
+      
+      formControls.forEach(input => {
+        // Initial state check (in case of autofill)
+        if (input.value !== '') {
+          input.parentElement.classList.add('active');
+        }
+        
+        input.addEventListener('focus', function() {
+          this.parentElement.classList.add('active');
+        });
+        
+        input.addEventListener('blur', function() {
+          if (this.value === '') {
+            this.parentElement.classList.remove('active');
+          }
+        });
+      });
+      
+      // Button click effect
+      const button = document.querySelector('.btn-submit');
+      button.addEventListener('mousedown', function() {
+        this.style.transform = 'scale(0.98)';
+      });
+      
+      button.addEventListener('mouseup', function() {
+        this.style.transform = '';
+      });
+      
+      // Social login animation
+      const socialBtns = document.querySelectorAll('.social-btn');
+      socialBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.style.transform = 'translateY(-3px) scale(1.1)';
+          setTimeout(() => {
+            this.style.transform = '';
+          }, 300);
+        });
+      });
+    });
+  </script>
 </body>
 </html>

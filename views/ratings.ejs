@@ -5,90 +5,412 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
   <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Righteous&display=swap');
+    
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e, #ffb92a, #5f8fff, #7d4cdb);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
       color: #fff;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50% }
+      50% { background-position: 100% 50% }
+      100% { background-position: 0% 50% }
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      padding: 30px 0;
+    }
+    
+    h1 {
+      font-family: 'Righteous', cursive;
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: #fff;
+      text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+    }
+    
+    p.subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    
+    .search-section {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       text-align: center;
     }
-    .songs-container {
+    
+    .search-container {
+      display: flex;
+      max-width: 600px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 50px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .search-container input {
+      flex-grow: 1;
+      padding: 15px 25px;
+      font-size: 16px;
+      border: none;
+      outline: none;
+      font-family: 'Poppins', sans-serif;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .search-container button {
+      padding: 0 25px;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+    }
+    
+    .search-container button:hover {
+      background: linear-gradient(45deg, #ff713e, #ffb92a);
+    }
+    
+    .trending-tags {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
-      margin: 20px auto;
+      gap: 10px;
+      margin: 20px 0;
     }
-    .song {
-      background: #fff;
-      color: #333;
-      border-radius: 10px;
-      padding: 10px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      max-width: 200px;
-    }
-    .song img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    .song h3 {
-      font-size: 1rem;
-      margin: 10px 0;
-    }
-    .search-bar {
-      margin: 20px auto;
-      text-align: center;
-    }
-    .search-bar input {
-      padding: 10px;
-      width: 300px;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-    .search-bar button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      color: #fff;
-      background: #ff7e5f;
-      border: none;
-      border-radius: 5px;
+    
+    .trending-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
-    .search-bar button:hover {
-      background: #feb47b;
+    
+    .trending-tag:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-3px);
+    }
+    
+    .songs-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 25px;
+      margin: 20px auto;
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .song {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .song:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .song-thumbnail {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .song-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+      color: #fff;
+    }
+    
+    .song-artist {
+      color: #ccc;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+    
+    .select-btn {
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: auto;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .select-btn:hover {
+      background: linear-gradient(45deg, #ff713e, #ffb92a);
+      transform: scale(1.05);
+    }
+    
+    .select-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.4s;
+    }
+    
+    .select-btn:hover:before {
+      left: 100%;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .pagination a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-3px);
+    }
+    
+    .pagination a.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .dance-animation {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      overflow: hidden;
+      z-index: -1;
+      opacity: 0.2;
+    }
+    
+    .dancer {
+      position: absolute;
+      bottom: 0;
+      width: 100px;
+      height: 150px;
+      background-size: contain;
+      background-position: bottom center;
+      background-repeat: no-repeat;
+      animation: dance 3s infinite alternate ease-in-out;
+    }
+    
+    @keyframes dance {
+      0% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+      100% { transform: translateY(0) rotate(-5deg); }
+    }
+    
+    .no-songs {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      margin: 40px auto;
+      max-width: 500px;
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .back-home {
+      display: inline-block;
+      margin-top: 30px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .back-home:hover {
+      transform: translateX(-5px);
+    }
+    
+    .back-home i {
+      margin-right: 5px;
     }
   </style>
 </head>
 <body>
-  <h1><%= title %></h1>
-  <div class="search-bar">
-    <form action="/ratings" method="GET">
-      <input type="text" name="query" placeholder="Search for a song..." value="<%= query || '' %>">
-      <button type="submit">Search</button>
-    </form>
-  </div>
-  <div class="songs-container">
-    <% songs.forEach(song => { %>
-      <div class="song">
-        <img src="<%= song.thumbnail %>" alt="<%= song.title %>">
-        <h3><%= song.title %></h3>
-        <p>Artist: <%= song.artist %></p>
-        <a href="/choreographies?songTitle=<%= encodeURIComponent(song.title) %>" class="btn">View Choreographies</a>
+  <div class="container">
+    <header>
+      <h1>Dance Rating Station</h1>
+      <p class="subtitle">Choose a song to start your dance evaluation journey!</p>
+    </header>
+    
+    <section class="search-section">
+      <form action="/ratings" method="GET">
+        <div class="search-container">
+          <input 
+            type="text" 
+            name="query" 
+            placeholder="Search for songs..." 
+            value="<%= typeof query !== 'undefined' ? query : '' %>"
+            required
+          >
+          <button type="submit"><i class="fas fa-search"></i> Search</button>
+        </div>
+      </form>
+      
+      <div class="trending-tags">
+        <div class="trending-tag" onclick="searchTag('pop dance')">Pop</div>
+        <div class="trending-tag" onclick="searchTag('hip hop')">Hip Hop</div>
+        <div class="trending-tag" onclick="searchTag('kpop')">K-Pop</div>
+        <div class="trending-tag" onclick="searchTag('edm')">EDM</div>
+        <div class="trending-tag" onclick="searchTag('salsa')">Salsa</div>
+        <div class="trending-tag" onclick="searchTag('trending')">Trending</div>
       </div>
-    <% }) %>
-  </div>
-  <div class="pagination">
-    <% if (previousPage) { %>
-      <a href="/ratings?page=<%= previousPage %>&query=<%= query %>" class="btn">Previous</a>
+    </section>
+    
+    <% if (songs && songs.length > 0) { %>
+      <div class="songs-container">
+        <% songs.forEach(song => { %>
+          <div class="song">
+            <img src="<%= song.thumbnail %>" alt="<%= song.title %>" class="song-thumbnail">
+            <div class="song-title"><%= song.title %></div>
+            <div class="song-artist"><%= song.artist %></div>
+            <a href="/ratings/choreographies?songTitle=<%= encodeURIComponent(song.title) %>&artist=<%= encodeURIComponent(song.artist) %>" class="select-btn">
+              Select <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        <% }); %>
+      </div>
+      
+      <div class="pagination">
+        <% if (previousPage) { %>
+          <a href="/ratings?page=<%= previousPage %>&query=<%= encodeURIComponent(query) %>">
+            <i class="fas fa-chevron-left"></i> Previous
+          </a>
+        <% } else { %>
+          <a class="disabled"><i class="fas fa-chevron-left"></i> Previous</a>
+        <% } %>
+        
+        <% if (nextPage) { %>
+          <a href="/ratings?page=<%= nextPage %>&query=<%= encodeURIComponent(query) %>">
+            Next <i class="fas fa-chevron-right"></i>
+          </a>
+        <% } else { %>
+          <a class="disabled">Next <i class="fas fa-chevron-right"></i></a>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="no-songs">
+        <i class="fas fa-music pulse" style="font-size: 3rem; margin-bottom: 20px;"></i>
+        <h3>No songs found!</h3>
+        <p>Try searching for a different song or check out the trending tags.</p>
+      </div>
     <% } %>
-    <% if (nextPage) { %>
-      <a href="/ratings?page=<%= nextPage %>&query=<%= query %>" class="btn">Next</a>
-    <% } %>
+    
+    <div class="dance-animation">
+      <div class="dancer" style="left: 10%; animation-delay: 0.2s; background-image: url('https://cdn-icons-png.flaticon.com/512/1807/1807748.png');"></div>
+      <div class="dancer" style="left: 30%; animation-delay: 0.7s; background-image: url('https://cdn-icons-png.flaticon.com/512/1910/1910236.png');"></div>
+      <div class="dancer" style="left: 50%; animation-delay: 0.4s; background-image: url('https://cdn-icons-png.flaticon.com/512/1807/1807695.png');"></div>
+      <div class="dancer" style="left: 70%; animation-delay: 0.9s; background-image: url('https://cdn-icons-png.flaticon.com/512/1807/1807751.png');"></div>
+      <div class="dancer" style="left: 90%; animation-delay: 0.5s; background-image: url('https://cdn-icons-png.flaticon.com/512/1910/1910294.png');"></div>
+    </div>
+    
+    <a href="/" class="back-home"><i class="fas fa-arrow-left"></i> Back to Home</a>
   </div>
+  
+  <script>
+    function searchTag(tag) {
+      window.location.href = `/ratings?query=${encodeURIComponent(tag)}`;
+    }
+    
+    // Add animation to songs as they appear in viewport
+    document.addEventListener('DOMContentLoaded', function() {
+      const songs = document.querySelectorAll('.song');
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = 1;
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      songs.forEach(song => {
+        song.style.opacity = 0;
+        song.style.transform = 'translateY(20px)';
+        song.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        observer.observe(song);
+      });
+    });
+  </script>
 </body>
 </html>

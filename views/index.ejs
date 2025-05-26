@@ -3,85 +3,342 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DanceVerse - Home</title>
+  <title>DanceVerse - Dance Your Way</title>
   <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Righteous&display=swap');
+    
     body {
-      font-family: Arial, sans-serif;
-      background: url('/images/michael-jackson.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
+      font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      text-align: center;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
     }
-    body::before {
+    
+    .page-wrapper {
+      position: relative;
+      min-height: 100vh;
+    }
+    
+    /* Colorful background with animated gradient */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e, #ffb92a, #5f8fff, #7d4cdb);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      z-index: -2;
+      opacity: 0.6;
+    }
+    
+    /* Add a texture overlay */
+    .texture-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="none"/><path d="M0 0L100 100ZM100 0L0 100Z" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
+      z-index: -1;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50% }
+      50% { background-position: 100% 50% }
+      100% { background-position: 0% 50% }
+    }
+    
+    /* Dancing silhouettes */
+    .dancers {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 30vh;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .dancer {
+      position: absolute;
+      bottom: 0;
+      width: 120px;
+      height: 180px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom center;
+      filter: brightness(0);
+      opacity: 0.7;
+      animation: dance 3s infinite alternate ease-in-out;
+    }
+    
+    .dancer:nth-child(1) {
+      left: 10%;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/1807/1807748.png');
+      animation-delay: 0.2s;
+    }
+    
+    .dancer:nth-child(2) {
+      left: 30%;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/1910/1910236.png');
+      animation-delay: 0.7s;
+    }
+    
+    .dancer:nth-child(3) {
+      left: 50%;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/1807/1807695.png');
+      animation-delay: 0.4s;
+    }
+    
+    .dancer:nth-child(4) {
+      left: 70%;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/1807/1807751.png');
+      animation-delay: 0.9s;
+    }
+    
+    .dancer:nth-child(5) {
+      left: 85%;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/1910/1910294.png');
+      animation-delay: 0.5s;
+    }
+    
+    @keyframes dance {
+      0% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+      100% { transform: translateY(0) rotate(-5deg); }
+    }
+    
+    /* Header section */
+    header {
+      padding: 60px 20px 40px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Main title with text shadow animation */
+    .main-title {
+      font-family: 'Righteous', cursive;
+      font-size: 5rem;
+      margin: 0;      background: linear-gradient(45deg, #ff3b5c, #ff713e, #ffb92a, #5f8fff);
+      background-size: 300% 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 4s infinite linear;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      letter-spacing: 2px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 0% 50% }
+      50% { background-position: 100% 50% }
+      100% { background-position: 0% 50% }
+    }
+    
+    .tagline {
+      font-size: 1.5rem;
+      margin: 15px 0 0;
+      font-weight: 300;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Button container */
+    .options-container {
+      margin: 50px auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 800px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Neon glowing buttons */
+    .btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 200px;
+      height: 200px;
+      padding: 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 1.4rem;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      color: #fff;
+    }
+    
+    .btn:before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6); /* Faded overlay */
-      z-index: -1;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: all 0.4s;
     }
-    header {
-      padding: 50px 20px;
-    }
-    header h1 {
-      font-size: 3.5rem;
-      margin: 0;
-      color: #5f8fff;
-    }
-    header p {
-      font-size: 1.5rem;
-      margin: 10px 0 0;
-    }
-    .options-container {
-      margin: 50px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .btn {
-      display: inline-block;
-      margin: 20px;
-      padding: 15px 30px;
-      font-size: 1.5rem;
-      color: #fff;
-      background: #ff7e5f;
-      border: none;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: background 0.3s, transform 0.2s;
-    }
+    
     .btn:hover {
-      background: #feb47b;
-      transform: scale(1.1);
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.3);
     }
+    
+    .btn:hover:before {
+      transform: translateX(100%);
+    }
+    
+    .btn.learn-dance {
+      background: linear-gradient(135deg, rgba(255, 59, 92, 0.3), rgba(255, 113, 62, 0.3));
+      border-color: rgba(255, 59, 92, 0.5);
+    }
+    
+    .btn.battles {
+      background: linear-gradient(135deg, rgba(95, 143, 255, 0.3), rgba(125, 76, 219, 0.3));
+      border-color: rgba(95, 143, 255, 0.5);
+    }
+    
+    .btn.login {
+      background: linear-gradient(135deg, rgba(255, 185, 42, 0.3), rgba(255, 136, 0, 0.3));
+      border-color: rgba(255, 185, 42, 0.5);
+    }
+    
+    .btn-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    }
+    
+    /* Footer section */
     footer {
-      margin-top: 50px;
       padding: 20px;
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
     }
+    
     footer p {
       margin: 0;
       font-size: 1rem;
     }
+    
+    /* Beat animation */
+    .beat {
+      display: inline-block;
+      animation: heartbeat 1.5s ease infinite;
+    }
+    
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.3); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.3); }
+      70% { transform: scale(1); }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 3.5rem;
+      }
+      
+      .options-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 80%;
+        height: 150px;
+        margin: 10px 0;
+      }
+      
+      .dancers {
+        height: 20vh;
+      }
+      
+      .dancer {
+        width: 80px;
+        height: 120px;
+      }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Welcome to DanceVerse</h1>
-    <p>Unleash your moves, rate your dance, and battle with others!</p>
-  </header>
-  <div class="options-container">
-    <a href="/ratings" class="btn">Check Dance Ratings</a>
-    <a href="/battles" class="btn">Start a Dance Battle</a>
+  <div class="page-wrapper">
+    <div class="bg-animation"></div>
+    <div class="texture-overlay"></div>
+    
+    <header>
+      <h1 class="main-title">DanceVerse</h1>
+      <p class="tagline">Unleash your moves, sync with beats, become legendary!</p>
+    </header>
+      <div class="options-container">
+      <a href="/songs" class="btn learn-dance">
+        <i class="fas fa-music btn-icon"></i>
+        Learn Dance Moves
+      </a>
+      <a href="/auth/login?redirect=battles" class="btn battles">
+        <i class="fas fa-bolt btn-icon"></i>
+        Dance Battles
+      </a>
+      <a href="/auth/login" class="btn login">
+        <i class="fas fa-sign-in-alt btn-icon"></i>
+        Login / Sign Up
+      </a>
+    </div>
+    
+    <div class="dancers">
+      <div class="dancer"></div>
+      <div class="dancer"></div>
+      <div class="dancer"></div>
+      <div class="dancer"></div>
+      <div class="dancer"></div>
+    </div>
+    
+    <footer>
+      <p>Made with <span class="beat">♥</span> by DanceVerse Team &copy; 2025</p>
+    </footer>
   </div>
-  <footer>
-    <p>&copy; 2023 DanceVerse. All rights reserved.</p>
-  </footer>
+  
+  <script>
+    // Add some interactive elements
+    document.addEventListener('DOMContentLoaded', function() {
+      const btns = document.querySelectorAll('.btn');
+      
+      btns.forEach(btn => {
+        btn.addEventListener('mouseover', function() {
+          playPopSound();
+        });
+      });
+      
+      function playPopSound() {
+        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' + Math.random());
+        audio.volume = 0.2;
+        audio.play().catch(e => {});
+      }
+    });
+  </script>
 </body>
 </html>

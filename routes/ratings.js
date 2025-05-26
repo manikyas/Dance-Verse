@@ -44,17 +44,22 @@ router.get('/', async (req, res) => {
 router.get('/choreographies', async (req, res) => {
   try {
     const songTitle = req.query.songTitle; // Get the selected song title from the query
+    const artist = req.query.artist || ''; // Get the artist name if available
+    
     if (!songTitle) {
       return res.render('choreographies', { title: 'Choreographies', choreographies: [], message: 'No song selected.' });
     }
 
     const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+    
+    // Build a better search query with the artist name if available
+    const searchQuery = artist ? `${songTitle} ${artist} dance choreography` : `${songTitle} dance choreography`;
 
     // Fetch choreographies for the selected song
     let response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
       params: {
         part: 'snippet',
-        q: `${songTitle} dance choreography`,
+        q: searchQuery,
         type: 'video',
         maxResults: 10,
         key: YOUTUBE_API_KEY,

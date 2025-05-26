@@ -1,6 +1,8 @@
 // Choreography selection functionality
 let currentVideoId;
 let videoDuration = 180; // Default duration in seconds if API fails
+let timeRangeStart = 0;
+let timeRangeEnd = 180;
 
 function playVideo(videoId) {
   const container = document.getElementById('fullscreen-container');
@@ -214,6 +216,19 @@ function closeModal() {
   }
 }
 
+// Function to open the time range modal
+function openTimeRangeModal(videoId, title) {
+  // Create or display a modal for selecting time range
+  const modal = document.getElementById('time-range-modal');
+  if (modal) {
+    modal.style.display = 'block';
+    document.getElementById('modal-title').innerText = `Select Time Range for ${title}`;
+  } else {
+    console.error('Time range modal element not found');
+  }
+  currentVideoId = videoId; // Store the video ID for further actions
+}
+
 async function fetchVideoDuration(videoId) {
   try {
     // For demo purposes, we'll use a fixed duration since API key might not be available
@@ -239,4 +254,66 @@ function parseISO8601Duration(duration) {
   const minutes = (match[2] ? parseInt(match[2]) : 0);
   const seconds = (match[3] ? parseInt(match[3]) : 0);
   return hours * 3600 + minutes * 60 + seconds;
+}
+
+// Fix the updateSelectedRangeDisplay function to ensure proper formatting
+function updateSelectedRangeDisplay() {
+  const startMin = Math.floor(timeRangeStart / 60);
+  const startSec = Math.round(timeRangeStart % 60);
+  const endMin = Math.floor(timeRangeEnd / 60);
+  const endSec = Math.round(timeRangeEnd % 60);
+
+  // Get the range display element
+  const rangeText = document.getElementById('selectedRange');
+  if (rangeText) {
+    // Format time string
+    rangeText.textContent = `${startMin}:${startSec < 10 ? '0' + startSec : startSec} - ${endMin}:${endSec < 10 ? '0' + endSec : endSec}`;
+  }
+}
+
+// Ensure the slider initializes and updates correctly
+function initTimeRangeSlider() {
+  const timeSlider = document.getElementById('timeRangeSlider');
+
+  if (timeSlider) {
+    if (typeof noUiSlider !== 'undefined') {
+      window.timeSlider = noUiSlider.create(timeSlider, {
+        start: [timeRangeStart, timeRangeEnd],
+        connect: true,
+        step: 1,
+        range: {
+          'min': 0,
+          'max': 180 // 3 minutes in seconds
+        }
+      });
+      window.timeSlider.on('update', function(values, handle) {
+        timeRangeStart = parseInt(values[0]);
+        timeRangeEnd = parseInt(values[1]);
+        updateSelectedRangeDisplay();
+      });
+    } else {
+      console.error("noUiSlider is not defined. Make sure the library is loaded.");
+      showError("Could not initialize the time slider. Please try refreshing the page.");
+    }
+  }
+}
+
+// Ensure the confirm button redirects with the correct parameters
+function confirmTimeRange() {
+  if (selectedVideoId) {
+    console.log("Confirm button clicked. Redirecting to camera page...");
+    // Store time range in localStorage for camera.ejs to access
+    localStorage.setItem('selectedTimeRange', JSON.stringify({
+      videoId: selectedVideoId,
+      title: selectedTitle,
+      startTime: timeRangeStart,
+      endTime: timeRangeEnd
+    }));
+
+    // Redirect to the camera page
+    window.location.href = '/camera';
+  } else {
+    console.error("No video ID selected");
+    showError("Please select a choreography first.");
+  }
 }

@@ -1,0 +1,98 @@
+/* Custom styles for the time range slider */
+
+/* Add arrow indicators to the slider */
+.time-range-slider .noUi-handle::before,
+.time-range-slider .noUi-handle::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  display: block;
+}
+
+/* Left handle - left-pointing arrow */
+.time-range-slider .noUi-handle-lower::before {
+  border-width: 6px 8px 6px 0;
+  border-color: transparent #ffcc00 transparent transparent;
+  left: -12px;
+  top: 8px;
+}
+
+/* Right handle - right-pointing arrow */
+.time-range-slider .noUi-handle-upper::after {
+  border-width: 6px 0 6px 8px;
+  border-color: transparent transparent transparent #ffcc00;
+  right: -12px;
+  top: 8px;
+}
+
+/* Enhanced styling for handles */
+.time-range-slider .noUi-handle {
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #ffcc00;
+  box-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+  cursor: grab;
+  width: 26px !important;
+  height: 26px !important;
+  top: -9px !important;
+}
+
+.time-range-slider .noUi-handle:active {
+  cursor: grabbing;
+}
+
+/* Remove default handle styles */
+.time-range-slider .noUi-handle::before,
+.time-range-slider .noUi-handle::after {
+  height: 0;
+  width: 0;
+  background: none;
+  left: auto;
+  top: auto;
+}
+
+/* Style the slider bar */
+.time-range-slider .noUi-connect {
+  background: linear-gradient(to right, #ffcc00, #ff9d00);
+}
+
+/* Add a label for "drag me" */
+.time-range-slider .noUi-handle[data-handle="0"]::before {
+  content: 'drag';
+  position: absolute;
+  font-size: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 5px;
+  border-radius: 3px;
+  bottom: -22px;
+  left: -5px;
+  animation: bounce 1.5s infinite;
+}
+
+.time-range-slider .noUi-handle[data-handle="1"]::after {
+  content: 'drag';
+  position: absolute;
+  font-size: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 5px;
+  border-radius: 3px;
+  bottom: -22px;
+  right: -5px;
+  animation: bounce 1.5s infinite;
+  animation-delay: 0.75s;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Hide the drag labels once user has interacted with the slider */
+.slider-active .noUi-handle::before,
+.slider-active .noUi-handle::after {
+  content: none !important;
+}

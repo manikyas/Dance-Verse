@@ -17,7 +17,6 @@
       box-sizing: border-box;
       font-family: 'Arial', sans-serif;
     }
-    
     body {
       overflow: hidden;
       background: #000;
@@ -25,6 +24,43 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      position: relative;
+    }
+    
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 80px;
+      height: 80px;
+      border: 8px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top: 8px solid #ff713e;
+      animation: spin 1s linear infinite;
+    }
+    
+    .loading-text {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #fff;
+      text-align: center;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     
     .container {
@@ -54,14 +90,13 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
-    
-    .camera-container {
+      .camera-container {
       flex: 1;
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
+      overflow: visible;
     }
     
     .video-overlay {
@@ -97,8 +132,7 @@
       object-fit: cover;
       z-index: 1;
     }
-    
-    #poseCanvas {
+      #poseCanvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -107,36 +141,13 @@
       pointer-events: none;
       z-index: 1;
     }
-    
-    .controls {
-      position: fixed;
-      bottom: 40px;
-      left: 0;
-      width: 100%;
-      display: flex !important;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      padding: 0 20px;
-      z-index: 9999;
-      pointer-events: auto;
-    }
-    
-    .record-btn {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: #ff3b5c;
-      border: 4px solid rgba(255, 255, 255, 0.8);
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      transition: all 0.3s ease;
-      z-index: 9999;
-    }
-    
-    .record-btn.recording {
+      .record-btn.recording {
       background: #fff;
       border-color: #ff3b5c;
+    }
+    
+    .record-btn.recording .fa-circle {
+      color: #ff3b5c;
     }
     
     .record-btn.recording::before {
@@ -467,9 +478,7 @@
     .cancel-time-btn {
       background: #444;
       color: #fff;
-    }
-
-    /* Ensure the controls and buttons are always visible and properly positioned */
+    }    /* Ensure the controls and buttons are always visible and properly positioned */
     .controls {
       position: fixed;
       bottom: 40px;
@@ -482,6 +491,11 @@
       padding: 0 20px;
       z-index: 9999;
       pointer-events: auto;
+      overflow: visible !important;
+      height: auto !important;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%);
+      padding-top: 40px;
+      padding-bottom: 20px;
     }
     
     .record-btn, .control-btn {
@@ -491,19 +505,33 @@
       justify-content: center;
       align-items: center;
       pointer-events: auto;
+      position: relative !important;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .control-btn:hover, .record-btn:hover {
       transform: scale(1.1);
-      transition: transform 0.2s ease;
+    }
+
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      min-width: 50px !important;
+      min-height: 50px !important;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 1.4rem;
+      color: #fff;
+      z-index: 9999;
     }
 
     .timer-btn {
       background: rgba(255, 255, 255, 0.3);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      cursor: pointer;
+    }
+
+    .timer-btn i {
+      font-size: 1.3rem;
     }
 
     .record-btn {
@@ -512,8 +540,32 @@
       background: #ff3b5c;
       border: 4px solid rgba(255, 255, 255, 0.8);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+    }
+    
+    .record-btn .fa-circle {
+      font-size: 24px;
+      color: white;
+      transition: color 0.3s ease;
     }
 
+    .record-btn.recording {
+      background: #fff;
+      border-color: #ff3b5c;
+    }
+    
+    .record-btn.recording .fa-circle {
+      color: #ff3b5c;
+    }
+    
+    .record-btn.recording::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background: #ff3b5c;
+      border-radius: 4px;
+    }
+    
     /* Ensure the modal appears on top */
     .modal {
       z-index: 10000;
@@ -572,28 +624,36 @@
     }
   </style>
 </head>
-<body>  <!-- Time Selection Section - Shown first -->
+<body>
+  <!-- Loading overlay for initial page load -->
+  <div class="loading-overlay" id="loadingOverlay" style="z-index: 10000; transition: opacity 0.5s ease;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Initializing Dance Studio...</div>
+    <button onclick="forceHideLoading()" style="margin-top: 30px; padding: 12px 25px; background: #ff3b5c; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">Continue Anyway</button>
+  </div>
+  
+  <script>
+    // Force hide the loading overlay if it gets stuck
+    function forceHideLoading() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      document.getElementById('cameraContainer').style.display = 'flex';
+    }
+    
+    // Auto-hide loading after 8 seconds as a fallback
+    setTimeout(() => {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay && loadingOverlay.style.display !== 'none') {
+        forceHideLoading();
+      }
+    }, 8000);
+  </script>
+
+  <!-- Time Selection Section removed as it's no longer needed -->
   <div class="time-selection-section" id="timeSelectionSection">
-    <div class="time-selection-content">
-      <h2 class="time-selection-title">Select Time Range for Your Dance</h2>
-      <div class="time-inputs">
-        <div class="time-input">
-          <label for="startTime">Start Time (seconds)</label>
-          <input type="number" id="startTime" min="0" value="0">
-        </div>
-        <div class="time-input">
-          <label for="endTime">End Time (seconds)</label>
-          <input type="number" id="endTime" min="1" value="60">
-        </div>
-      </div>
-      <div class="time-buttons">
-        <button class="time-btn confirm-time-btn" onclick="confirmTimeRange()">Confirm</button>
-        <button class="time-btn cancel-time-btn" onclick="window.history.back()">Cancel</button>
-      </div>
-    </div>
+    <!-- This section is intentionally hidden as time selection is now handled on the choreographies page -->
   </div>
 
-  <!-- Main Camera UI - Shown after time selection -->  <div class="container" id="cameraContainer" style="display: none;">
+  <!-- Main Camera UI - Shown after time selection --><div class="container" id="cameraContainer" style="display: none;">
     <div class="fullscreen-container" id="fullscreenContainer">
       <div class="top-bar">
         <div class="title">Dance Recording</div>
@@ -611,7 +671,9 @@
           <div class="control-btn timer-btn" onclick="openTimerModal()">
             <i class="fas fa-stopwatch"></i>
           </div>
-          <div class="record-btn" id="recordBtn" onclick="toggleRecording()"></div>
+          <div class="record-btn" id="recordBtn" onclick="toggleRecording()">
+            <i class="fas fa-circle" id="recordIcon"></i>
+          </div>
           <div class="control-btn" onclick="flipCamera()">
             <i class="fas fa-sync-alt"></i>
           </div>
@@ -742,42 +804,96 @@
     let timeRange = { startTime: 0, endTime: 60 };
     // Timer configuration
 const defaultTimerDuration = 5;
-let timerDuration = defaultTimerDuration; // Timer duration in seconds
-      // Check if there's a saved time range in localStorage
-    document.addEventListener('DOMContentLoaded', function() {
-      const savedTimeRange = localStorage.getItem('danceTimeRange');
-      if (savedTimeRange) {
-        try {
-          const parsedTimeRange = JSON.parse(savedTimeRange);
-          document.getElementById('startTime').value = parsedTimeRange.startTime;
-          document.getElementById('endTime').value = parsedTimeRange.endTime;
-        } catch (e) {
-          console.error('Error parsing saved time range', e);
+let timerDuration = defaultTimerDuration; // Timer duration in seconds      // Initialize the camera when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+      // Get the time range from the URL query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('videoId');
+      const rangeParams = urlParams.get('range'); // Renamed to avoid conflict
+
+      // 1. Set initial visibility: Show time selection, hide camera.
+      document.getElementById('timeSelectionSection').style.display = 'flex';
+      document.getElementById('cameraContainer').style.display = 'none';
+
+      // 2. Clear time input fields to ensure a fresh start for the user.
+      document.getElementById('startTime').value = '';
+      document.getElementById('endTime').value = '';
+      
+      // 3. Handle URL parameters for context (e.g., videoId for title, default internal timeRange)
+      // This does NOT pre-fill the user-facing input fields for time selection.
+      if (videoId) {
+        const timeSelectionTitle = document.querySelector('.time-selection-title');
+        if (timeSelectionTitle) {
+            timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + videoId + '</small>';
         }
+        timeRange.videoId = videoId; // Store videoId in the global timeRange object
+      } else {
+        const timeSelectionTitle = document.querySelector('.time-selection-title');
+        if (timeSelectionTitle) {
+            // Default title if no videoId from URL
+            timeSelectionTitle.innerHTML = 'Select Your Practice Time Range';
+        }
+        timeRange.videoId = ''; // Default
+      }
+
+      if (rangeParams) { // If range is provided in URL
+        const [startFromUrl, endFromUrl] = rangeParams.split('-').map(Number);
+        timeRange.startTime = startFromUrl;
+        timeRange.endTime = endFromUrl;
+      } else {
+        // Default internal values if no range in URL
+        timeRange.startTime = 0; 
+        timeRange.endTime = 60; 
       }
       
-      // Also get choreography details if available
-      const savedChoreography = localStorage.getItem('selectedTimeRange');
-      if (savedChoreography) {
-        try {
-          const choreography = JSON.parse(savedChoreography);
-          console.log('Selected choreography:', choreography);
-          
-          // Use this to show info about the selected choreography
-          const timeSelectionTitle = document.querySelector('.time-selection-title');
-          if (timeSelectionTitle && choreography.videoId) {
-            timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + choreography.videoId + '</small>';
-          }
-          
-          // Auto-fill times if available
-          if (choreography.startTime && choreography.endTime) {
-            document.getElementById('startTime').value = choreography.startTime;
-            document.getElementById('endTime').value = choreography.endTime;
-          }
-        } catch (e) {
-          console.error('Error parsing choreography data', e);
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      
+      // Auto-hide loading after 8 seconds as a fallback (from original code line 643)
+      const loadingTimeoutFallback = setTimeout(() => {
+        if (loadingOverlay && loadingOverlay.style.display !== 'none') {
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+          }, 500);
         }
+      }, 8000);
+      
+      // 4. Hide the main "Initializing Dance Studio" loading overlay proactively.
+      if (loadingOverlay && loadingOverlay.style.display !== 'none') {
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+        }, 500);
+        clearTimeout(loadingTimeoutFallback); // Clear the longer fallback
       }
+      
+      // 5. initCamera() is NOT called here. It's called by confirmTimeRange();
+        
+        // Also get choreography details if available (e.g. for title, but not for pre-filling inputs)
+        const savedChoreography = localStorage.getItem('selectedTimeRange');
+        if (savedChoreography) {
+          try {
+            const choreography = JSON.parse(savedChoreography);
+            console.log('Selected choreography from localStorage:', choreography);
+            
+            // Update title from localStorage if no videoId from URL and title is still default
+            // This part is optional and depends on desired behavior for the title.
+            // For now, URL videoId takes precedence for the title.
+            // if (!videoId && timeSelectionTitle && choreography.videoId) {
+            //   timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + choreography.videoId + '</small>';
+            // }
+            
+            // Ensure inputs are NOT auto-filled from localStorage here, as they are cleared above.
+            // The following lines that were previously here are intentionally omitted/commented:
+            // if (choreography.startTime && choreography.endTime) {
+            //   document.getElementById('startTime').value = choreography.startTime;
+            //   document.getElementById('endTime').value = choreography.endTime;
+            // }
+          } catch (e) {
+            console.error('Error parsing choreography data from localStorage', e);
+          }
+        }
+      // }); // This was an extra closing bracket in the thought process, removed.
     });
     
     // Function to start the camera after time selection
@@ -785,9 +901,26 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
       try {
         const startTime = document.getElementById('startTime').value;
         const endTime = document.getElementById('endTime').value;
+          if (!startTime || !endTime) {
+          alert('Please enter both start and end times for your dance practice. This will help sync the music properly.');
+          return;
+        }
         
-        if (!startTime || !endTime || parseInt(startTime) >= parseInt(endTime)) {
-          alert('Please enter valid time range. Start time must be less than end time.');
+        const startVal = parseInt(startTime);
+        const endVal = parseInt(endTime);
+        
+        if (isNaN(startVal) || isNaN(endVal)) {
+          alert('Please enter valid numeric values for the time range.');
+          return;
+        }
+        
+        if (startVal >= endVal) {
+          alert('The start time must be less than the end time. Please adjust your time range to allow enough time for your dance practice.');
+          return;
+        }
+        
+        if (endVal - startVal < 5) {
+          alert('Your dance time is too short. Please select a time range of at least 5 seconds for proper recording.');
           return;
         }
         
@@ -804,28 +937,59 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
         console.error('Error in confirmTimeRange:', error);
       }
     }
-    
-    // Function to initialize the camera
+      // Function to initialize the camera - returning a promise for better flow control
     async function initCamera() {
-      try {
-        const constraints = {
-          audio: true,
-          video: {
-            facingMode: facingMode,
+      return new Promise(async (resolve, reject) => {
+        try {
+          const constraints = {
+            audio: true,
+            video: {
+              facingMode: facingMode,
+            }
+          };
+          
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          const videoElement = document.getElementById('videoElement');
+          videoElement.srcObject = stream;
+          
+          // Disable mirroring by applying CSS transform to show normal camera view
+          videoElement.style.transform = "scaleX(1)";
+          
+          // Add video loaded event to ensure video is ready
+          videoElement.onloadedmetadata = async () => {
+            try {
+              // Initialize pose detection after video is ready
+              await initPoseDetection();
+              resolve(); // Successfully initialized
+            } catch (error) {
+              console.error('Error in pose detection initialization:', error);
+              // We still resolve, as camera works even without pose detection
+              resolve();
+            }
+          };
+          
+          // Handle video error
+          videoElement.onerror = (event) => {
+            reject(new Error('Video element error: ' + event));
+          };
+          
+        } catch (error) {
+          console.error('Error in initCamera:', error);
+          
+          // Enhanced error messages
+          if (error.name === 'NotAllowedError') {
+            reject(new Error('Camera access denied. Please grant permission to use your camera.'));
+          } else if (error.name === 'NotFoundError') {
+            reject(new Error('No camera detected. Please connect a camera to your device.'));
+          } else if (error.name === 'NotReadableError') {
+            reject(new Error('Your camera is in use by another application.'));
+          } else if (error.name === 'OverconstrainedError') {
+            reject(new Error('The requested camera settings cannot be satisfied.'));
+          } else {
+            reject(new Error('Unable to access camera: ' + error.message));
           }
-        };
-        
-  stream = await navigator.mediaDevices.getUserMedia(constraints);
-  const videoElement = document.getElementById('videoElement');
-  videoElement.srcObject = stream;
-  
-  // Initialize pose detection
-  await initPoseDetection();
-  
-} catch (error) {
-        console.error('Error in initCamera:', error);
-        alert('Unable to access camera. Please check your permissions.');
-      }
+        }
+      });
     }
     
     // Function to initialize pose detection
@@ -841,10 +1005,34 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
         
         poseDetection = true;
         detectPose();
-        
-      } catch (error) {
+          } catch (error) {
         console.error('Error in initPoseDetection:', error);
         poseDetection = false;
+        
+        // Show non-blocking error notification for pose detection
+        const notification = document.createElement('div');
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.left = '50%';
+        notification.style.transform = 'translateX(-50%)';
+        notification.style.background = 'rgba(255, 59, 92, 0.9)';
+        notification.style.color = '#fff';
+        notification.style.padding = '10px 20px';
+        notification.style.borderRadius = '5px';
+        notification.style.zIndex = '10000';
+        notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+        notification.style.textAlign = 'center';
+        notification.innerHTML = `
+          <div style="font-weight: bold; margin-bottom: 5px;">Pose Detection Failed</div>
+          <div style="font-size: 0.9rem;">Your dance will still be recorded, but without motion tracking.</div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove notification after 5 seconds
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 5000);
       }
     }
     
@@ -863,9 +1051,8 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
         async function detect() {
           try {
             if (!poseDetection) return;
-            
-            const pose = await poseNet.estimateSinglePose(video, {
-              flipHorizontal: facingMode === "user" // flip if front camera
+              const pose = await poseNet.estimateSinglePose(video, {
+              flipHorizontal: false // don't flip since we're not mirroring
             });
             
             // Clear canvas
@@ -961,9 +1148,9 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
 
                 if (countdown <= 0) {
                   clearInterval(countdownInterval);
-                  timerDisplay.style.display = 'none';
-                  startRecording();
+                  timerDisplay.style.display = 'none';                  startRecording();
                   recordBtn.classList.add('recording');
+                  document.getElementById('recordIcon').classList.replace('fa-circle', 'fa-square');
                 }
               } catch (error) {
                 console.error('Error during countdown:', error);
@@ -973,10 +1160,12 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
           } else {
             startRecording();
             recordBtn.classList.add('recording');
+            document.getElementById('recordIcon').classList.replace('fa-circle', 'fa-square');
           }
         } else {
           stopRecording();
           recordBtn.classList.remove('recording');
+          document.getElementById('recordIcon').classList.replace('fa-square', 'fa-circle');
         }
       } catch (error) {
         console.error('Error in toggleRecording:', error);
@@ -1018,31 +1207,61 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
             console.error('Error in recorder.onstop:', error);
           }
         };
-
         recorder.start();
         isRecording = true;
+        
+        // Improved audio playback method - YouTube URLs can't be used directly with Audio()
+        if (timeRange.videoId) {
+          // Create a hidden iframe for better audio playback
+          const audioFrame = document.createElement('iframe');
+          audioFrame.id = 'audioFrame';
+          audioFrame.style.display = 'none';
+          audioFrame.allow = 'autoplay';
+          audioFrame.src = `https://www.youtube.com/embed/${timeRange.videoId}?start=${timeRange.startTime}&end=${timeRange.endTime}&autoplay=1`;
+          document.body.appendChild(audioFrame);
+        } else {
+          console.log('No video ID available for audio playback');
+        }
 
-        const audio = new Audio(`https://www.youtube.com/embed/${timeRange.videoId}?start=${timeRange.startTime}&end=${timeRange.endTime}`);
-        audio.play();
-
-        console.log('Recording started.');
-      } catch (error) {
+        console.log('Recording started.');      } catch (error) {
         console.error('Error in startRecording:', error);
-        alert('Failed to start recording. Please try again.');
+        
+        // Enhanced error feedback for recording issues
+        if (error.name === 'NotAllowedError') {
+          alert('Recording permission denied. Please grant microphone and camera permissions to record your dance.');
+        } else if (error.name === 'InvalidStateError') {
+          alert('The recorder is in an invalid state. Please refresh the page and try again.');
+        } else if (error.message && error.message.includes('mimeType')) {
+          alert('Your browser doesn\'t support this recording format. Please try using Chrome or Firefox.');
+        } else {
+          alert('Failed to start recording: ' + error.message + '. Please refresh the page and try again.');
+        }
       }
     }
 
-    // Function to stop recording
-    function stopRecording() {
+    // Function to stop recording    function stopRecording() {
       try {
         if (!recorder || recorder.state === 'inactive') return;
 
         recorder.stop();
         isRecording = false;
+        
+        // Remove the audio iframe if it exists
+        const audioFrame = document.getElementById('audioFrame');
+        if (audioFrame) {
+          document.body.removeChild(audioFrame);
+        }
+        
+        // After stopping recording, show analysis option
+        setTimeout(() => {
+          const confirmAnalysis = confirm('Recording complete! Would you like to analyze your dance performance?');
+          if (confirmAnalysis) {
+            analyzeDancePerformance();
+          }
+        }, 500);
       } catch (error) {
         console.error('Error in stopRecording:', error);
       }
-    }
     
     // Function to analyze dance performance and show results
     function analyzeDancePerformance() {
@@ -1290,9 +1509,10 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds
       } else {
         icon.classList.replace('fa-compress', 'fa-expand');
       }
+    });    // Add event listener for document loaded state
+    window.addEventListener('load', () => {
+      console.log('Page fully loaded. Camera initialization in progress...');
     });
-
-    // ...existing code...
   </script>
 </body>
 </html>
