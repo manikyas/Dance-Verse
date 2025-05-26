@@ -3,79 +3,1296 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Camera</title>
+  <title>Dance Recording Studio</title>
+  <!-- TensorFlow.js and PoseNet for pose detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+  <!-- MediaPipe for more accurate pose detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    
     body {
+      overflow: hidden;
+      background: #000;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 10;
+    }
+    
+    .top-bar .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    
+    .top-bar .settings {
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    .camera-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .timer-display {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 1.5rem;
+      padding: 5px 15px;
+      border-radius: 20px;
+      z-index: 9998;
+      pointer-events: none;
+    }
+    
+    #videoElement {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+    
+    #poseCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .controls {
+      position: fixed;
+      bottom: 40px;
+      left: 0;
+      width: 100%;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 0 20px;
+      z-index: 9999;
+      pointer-events: auto;
+    }
+    
+    .record-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #ff3b5c;
+      border: 4px solid rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+      z-index: 9999;
+    }
+    
+    .record-btn.recording {
+      background: #fff;
+      border-color: #ff3b5c;
+    }
+    
+    .record-btn.recording::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background: #ff3b5c;
+      border-radius: 4px;
+    }
+    
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.4rem;
+      color: #fff;
+      z-index: 9999;
+    }
+    
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+      transition: transform 0.2s ease;
+    }
+    
+    .timer-btn i {
+      font-size: 1.3rem;
+    }
+    
+    /* Timer settings modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    
+    .modal-content {
+      background: #222;
+      border-radius: 15px;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+      color: #fff;
+    }
+    
+    .close-modal {
+      font-size: 1.8rem;
+      color: #aaa;
+      cursor: pointer;
+    }
+    
+    .timer-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .timer-option {
+      padding: 15px;
+      border-radius: 10px;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    
+    .timer-option:hover {
+      background: #444;
+    }
+    
+    /* Results screen */
+    .results-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #111;
+      z-index: 2000;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #333;
+    }
+    
+    .results-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #ff3b5c;
+    }
+    
+    .close-results {
+      font-size: 1.8rem;
+      color: #fff;
+      cursor: pointer;
+    }
+    
+    .results-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px 0;
+    }
+    
+    .rating-section {
+      background: #222;
+      border-radius: 15px;
+      padding: 20px;
+    }
+    
+    .rating-title {
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+    
+    .star-rating {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      font-size: 2rem;
+      color: gold;
+      margin-bottom: 15px;
+    }
+    
+    .rating-details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .rating-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .rating-category {
+      color: #ccc;
+    }
+    
+    .rating-score {
+      font-weight: bold;
+      color: #fff;
+    }
+    
+    .feedback-section {
+      background: #222;
+      border-radius: 15px;
+      padding: 20px;
+    }
+    
+    .feedback-title {
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+    
+    .feedback-content {
+      color: #ccc;
+      line-height: 1.6;
+    }
+    
+    .recommendations-section {
+      background: #222;
+      border-radius: 15px;
+      padding: 20px;
+    }
+    
+    .recommendations-title {
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+    
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .recommendation-item {
+      background: #333;
+      border-radius: 10px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-    }
-
-    video {
-      width: 80%;
-      max-width: 600px;
-      border: 2px solid #fff;
-      border-radius: 10px;
-    }
-
-    .controls {
-      margin-top: 20px;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      font-size: 1rem;
-      color: #fff;
-      background: linear-gradient(45deg, #ff7e5f, #feb47b);
-      border: none;
-      border-radius: 5px;
       cursor: pointer;
+    }
+    
+    .recommendation-img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .recommendation-title {
+      font-size: 0.9rem;
+      color: #fff;
+      text-align: center;
+    }
+    
+    .battles-btn {
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 20px;
+      cursor: pointer;
+      font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+    
+    .time-selection-section {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .time-selection-content {
+      background: #222;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      padding: 30px;
+    }
+    
+    .time-selection-title {
+      font-size: 1.6rem;
+      color: #fff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .time-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .time-input {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .time-input label {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+    
+    .time-input input {
+      padding: 12px;
+      background: #333;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .time-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+    }
+    
+    .time-btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    
+    .confirm-time-btn {
+      background: #ff3b5c;
+      color: #fff;
+    }
+    
+    .cancel-time-btn {
+      background: #444;
+      color: #fff;
+    }
 
-    .btn:hover {
-      background: linear-gradient(45deg, #feb47b, #ff7e5f);
+    /* Ensure the controls and buttons are always visible and properly positioned */
+    .controls {
+      position: fixed;
+      bottom: 40px;
+      left: 0;
+      width: 100%;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 0 20px;
+      z-index: 9999;
+      pointer-events: auto;
+    }
+    
+    .record-btn, .control-btn {
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .control-btn:hover, .record-btn:hover {
+      transform: scale(1.1);
+      transition: transform 0.2s ease;
+    }
+
+    .timer-btn {
+      background: rgba(255, 255, 255, 0.3);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .record-btn {
+      width: 70px;
+      height: 70px;
+      background: #ff3b5c;
+      border: 4px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Ensure the modal appears on top */
+    .modal {
+      z-index: 10000;
+    }
+
+    /* Ensure timer display is visible when active */
+    .timer-display {
+      z-index: 9998;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Position video elements below controls */
+    #videoElement, #poseCanvas {
+      z-index: 1;
+    }
+
+    .camera-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .fullscreen-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      background: #000;
+    }
+
+    .fullscreen-container:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .fullscreen-container:fullscreen .camera-container {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+    }
+
+    .camera-container {
+      width: 100%;
+      max-width: 640px;
+      height: 480px;
+      position: relative;
+      margin: 0 auto;
+      overflow: hidden;
+      background: #000;
     }
   </style>
 </head>
-<body>
-  <h1>Camera</h1>
-  <video id="camera" autoplay></video>
-  <div class="controls">
-    <button class="btn" onclick="stopCamera()">Stop Camera</button>
+<body>  <!-- Time Selection Section - Shown first -->
+  <div class="time-selection-section" id="timeSelectionSection">
+    <div class="time-selection-content">
+      <h2 class="time-selection-title">Select Time Range for Your Dance</h2>
+      <div class="time-inputs">
+        <div class="time-input">
+          <label for="startTime">Start Time (seconds)</label>
+          <input type="number" id="startTime" min="0" value="0">
+        </div>
+        <div class="time-input">
+          <label for="endTime">End Time (seconds)</label>
+          <input type="number" id="endTime" min="1" value="60">
+        </div>
+      </div>
+      <div class="time-buttons">
+        <button class="time-btn confirm-time-btn" onclick="confirmTimeRange()">Confirm</button>
+        <button class="time-btn cancel-time-btn" onclick="window.history.back()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Camera UI - Shown after time selection -->  <div class="container" id="cameraContainer" style="display: none;">
+    <div class="fullscreen-container" id="fullscreenContainer">
+      <div class="top-bar">
+        <div class="title">Dance Recording</div>
+        <div class="settings" onclick="goBack()"><i class="fas fa-times"></i></div>
+      </div>
+      <div class="camera-container">
+        <video id="videoElement" autoplay playsinline></video>
+        <canvas id="poseCanvas"></canvas>
+        
+        <div class="video-overlay">
+          <div class="timer-display" id="timerDisplay">3</div>
+        </div>
+        
+        <div class="controls">
+          <div class="control-btn timer-btn" onclick="openTimerModal()">
+            <i class="fas fa-stopwatch"></i>
+          </div>
+          <div class="record-btn" id="recordBtn" onclick="toggleRecording()"></div>
+          <div class="control-btn" onclick="flipCamera()">
+            <i class="fas fa-sync-alt"></i>
+          </div>
+          <div class="control-btn" onclick="toggleFullscreen()">
+            <i class="fas fa-expand"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timer Modal -->
+  <div class="modal" id="timerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Set Timer</div>
+        <div class="close-modal" onclick="closeTimerModal()">&times;</div>
+      </div>
+      <div class="timer-options">
+        <div class="timer-option" onclick="setTimer(3)">3 seconds</div>
+        <div class="timer-option" onclick="setTimer(5)">5 seconds</div>
+        <div class="timer-option" onclick="setTimer(10)">10 seconds</div>
+        <div class="timer-option" onclick="closeTimerModal()">No Timer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div class="results-screen" id="resultsScreen">
+    <div class="results-header">
+      <div class="results-title">Your Dance Results</div>
+      <div class="close-results" onclick="closeResults()"><i class="fas fa-times"></i></div>
+    </div>
+    
+    <div class="results-content">
+      <div class="rating-section">
+        <div class="rating-title">Overall Rating</div>
+        <div class="star-rating">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star-half-alt"></i>
+        </div>
+        <div class="rating-details">
+          <div class="rating-row">
+            <div class="rating-category">Rhythm</div>
+            <div class="rating-score">8.5/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Movement</div>
+            <div class="rating-score">9.0/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Energy</div>
+            <div class="rating-score">7.8/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Technique</div>
+            <div class="rating-score">8.2/10</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="feedback-section">
+        <div class="feedback-title">Dance Feedback</div>
+        <div class="feedback-content">
+          <p>Great energy in your moves! Your rhythm was excellent, especially during the chorus section. Here are some suggestions to improve:</p>
+          <ul>
+            <li>Work on maintaining consistent arm positions during turns</li>
+            <li>Focus on smoother transitions between movement sequences</li>
+            <li>Try to add more dynamic variations in your footwork</li>
+            <li>Practice keeping timing with the beat during faster sections</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="recommendations-section">
+        <div class="recommendations-title">Recommended for You</div>
+        <div class="recommendations-grid">
+          <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Dynamite'">
+            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <div class="recommendation-title">Dynamite - BTS</div>
+          </div>
+          <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Bad'">
+            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <div class="recommendation-title">Bad - Michael Jackson</div>
+          </div>
+          <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Savage'">
+            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <div class="recommendation-title">Savage - Megan Thee Stallion</div>
+          </div>
+          <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Level Up'">
+            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <div class="recommendation-title">Level Up - Ciara</div>
+          </div>
+        </div>
+      </div>
+        <div class="battles-section">
+        <div class="feedback-title">Dance Battles</div>
+        <p style="margin-bottom: 15px; color: #ccc;">Challenge your friends or join existing dance battles to showcase your skills!</p>
+        <div class="battle-options" style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <div class="battle-option" style="flex: 1; min-width: 150px; background: #2a2a2a; padding: 15px; border-radius: 10px; cursor: pointer;" onclick="window.location.href = '/battles'">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #ff3b5c;">Join a Battle</div>
+            <p style="font-size: 0.9rem; color: #aaa;">Participate in existing dance battles and earn points on the leaderboard.</p>
+          </div>
+          <div class="battle-option" style="flex: 1; min-width: 150px; background: #2a2a2a; padding: 15px; border-radius: 10px; cursor: pointer;" onclick="createNewBattle()">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #ff3b5c;">Create a Battle</div>
+            <p style="font-size: 0.9rem; color: #aaa;">Start your own dance battle and invite friends to compete.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const video = document.getElementById('camera');
-
-    // Start the camera
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
-        video.srcObject = stream;
-        window.cameraStream = stream; // Save the stream to stop it later
-        console.log('Camera started successfully.');
-      })
-      .catch((err) => {
-        alert('Unable to access the camera. Please check your permissions.');
-        console.error('Camera error:', err);
-      });
-
-    // Stop the camera
-    function stopCamera() {
-      if (window.cameraStream) {
-        const tracks = window.cameraStream.getTracks();
-        tracks.forEach((track) => track.stop());
-        alert('Camera stopped.');
-        console.log('Camera stopped successfully.');
+    // Global variables
+    let stream;
+    let recorder;
+    let recordedChunks = [];
+    // let timerDuration = 5; // Default timer duration in seconds (removed duplicate)
+    let isRecording = false;
+    let countdownTimer;
+    let poseDetection = false;
+    let poseNet;
+    let timerInterval;
+    let facingMode = "user"; // front camera by default
+    let timeRange = { startTime: 0, endTime: 60 };
+    // Timer configuration
+const defaultTimerDuration = 5;
+let timerDuration = defaultTimerDuration; // Timer duration in seconds
+      // Check if there's a saved time range in localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTimeRange = localStorage.getItem('danceTimeRange');
+      if (savedTimeRange) {
+        try {
+          const parsedTimeRange = JSON.parse(savedTimeRange);
+          document.getElementById('startTime').value = parsedTimeRange.startTime;
+          document.getElementById('endTime').value = parsedTimeRange.endTime;
+        } catch (e) {
+          console.error('Error parsing saved time range', e);
+        }
+      }
+      
+      // Also get choreography details if available
+      const savedChoreography = localStorage.getItem('selectedTimeRange');
+      if (savedChoreography) {
+        try {
+          const choreography = JSON.parse(savedChoreography);
+          console.log('Selected choreography:', choreography);
+          
+          // Use this to show info about the selected choreography
+          const timeSelectionTitle = document.querySelector('.time-selection-title');
+          if (timeSelectionTitle && choreography.videoId) {
+            timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + choreography.videoId + '</small>';
+          }
+          
+          // Auto-fill times if available
+          if (choreography.startTime && choreography.endTime) {
+            document.getElementById('startTime').value = choreography.startTime;
+            document.getElementById('endTime').value = choreography.endTime;
+          }
+        } catch (e) {
+          console.error('Error parsing choreography data', e);
+        }
+      }
+    });
+    
+    // Function to start the camera after time selection
+    function confirmTimeRange() {
+      try {
+        const startTime = document.getElementById('startTime').value;
+        const endTime = document.getElementById('endTime').value;
+        
+        if (!startTime || !endTime || parseInt(startTime) >= parseInt(endTime)) {
+          alert('Please enter valid time range. Start time must be less than end time.');
+          return;
+        }
+        
+        timeRange.startTime = parseInt(startTime);
+        timeRange.endTime = parseInt(endTime);
+        
+        // Hide time selection screen and show camera
+        document.getElementById('timeSelectionSection').style.display = 'none';
+        document.getElementById('cameraContainer').style.display = 'flex';
+        
+        // Start the camera
+        initCamera();
+      } catch (error) {
+        console.error('Error in confirmTimeRange:', error);
       }
     }
+    
+    // Function to initialize the camera
+    async function initCamera() {
+      try {
+        const constraints = {
+          audio: true,
+          video: {
+            facingMode: facingMode,
+          }
+        };
+        
+  stream = await navigator.mediaDevices.getUserMedia(constraints);
+  const videoElement = document.getElementById('videoElement');
+  videoElement.srcObject = stream;
+  
+  // Initialize pose detection
+  await initPoseDetection();
+  
+} catch (error) {
+        console.error('Error in initCamera:', error);
+        alert('Unable to access camera. Please check your permissions.');
+      }
+    }
+    
+    // Function to initialize pose detection
+    async function initPoseDetection() {
+      try {
+        // Load PoseNet model
+        poseNet = await posenet.load({
+          architecture: 'MobileNetV1',
+          outputStride: 16,
+          inputResolution: { width: 640, height: 480 },
+          multiplier: 0.75
+        });
+        
+        poseDetection = true;
+        detectPose();
+        
+      } catch (error) {
+        console.error('Error in initPoseDetection:', error);
+        poseDetection = false;
+      }
+    }
+    
+    // Function to detect poses continuously
+    async function detectPose() {
+      try {
+        if (!poseDetection) return;
+        
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('poseCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = video.clientWidth;
+        canvas.height = video.clientHeight;
+        
+        async function detect() {
+          try {
+            if (!poseDetection) return;
+            
+            const pose = await poseNet.estimateSinglePose(video, {
+              flipHorizontal: facingMode === "user" // flip if front camera
+            });
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw keypoints
+            if (isRecording) {
+              drawKeypoints(pose.keypoints, ctx);
+              drawSkeleton(pose.keypoints, ctx);
+            }
+            
+            requestAnimationFrame(detect);
+          } catch (error) {
+            console.error('Error in detect function:', error);
+          }
+        }
+        
+        detect();
+      } catch (error) {
+        console.error('Error in detectPose:', error);
+      }
+    }
+    
+    // Function to draw keypoints
+    function drawKeypoints(keypoints, ctx) {
+      try {
+        keypoints.forEach(keypoint => {
+          if (keypoint.score > 0.5) {
+            ctx.beginPath();
+            ctx.arc(keypoint.position.x, keypoint.position.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00ff00';
+            ctx.fill();
+          }
+        });
+      } catch (error) {
+        console.error('Error in drawKeypoints:', error);
+      }
+    }
+    
+    // Function to draw skeleton
+    function drawSkeleton(keypoints, ctx) {
+      try {
+        const adjacentKeyPoints = [
+          ['nose', 'leftEye'], ['leftEye', 'leftEar'], ['nose', 'rightEye'],
+          ['rightEye', 'rightEar'], ['leftShoulder', 'rightShoulder'],
+          ['leftShoulder', 'leftElbow'], ['leftElbow', 'leftWrist'],
+          ['rightShoulder', 'rightElbow'], ['rightElbow', 'rightWrist'],
+          ['leftShoulder', 'leftHip'], ['rightShoulder', 'rightHip'],
+          ['leftHip', 'rightHip'], ['leftHip', 'leftKnee'],
+          ['leftKnee', 'leftAnkle'], ['rightHip', 'rightKnee'],
+          ['rightKnee', 'rightAnkle']
+        ];
+        
+        const keypointMap = {};
+        keypoints.forEach(keypoint => {
+          keypointMap[keypoint.part] = keypoint;
+        });
+        
+        adjacentKeyPoints.forEach(([first, second]) => {
+          const firstKeypoint = keypointMap[first];
+          const secondKeypoint = keypointMap[second];
+          
+          if (firstKeypoint.score > 0.5 && secondKeypoint.score > 0.5) {
+            ctx.beginPath();
+            ctx.moveTo(firstKeypoint.position.x, firstKeypoint.position.y);
+            ctx.lineTo(secondKeypoint.position.x, secondKeypoint.position.y);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#00ff00';
+            ctx.stroke();
+          }
+        });
+      } catch (error) {
+        console.error('Error in drawSkeleton:', error);
+      }
+    }
+    
+    // Function to toggle recording
+    function toggleRecording() {
+      try {
+        const recordBtn = document.getElementById('recordBtn');
+
+        if (!isRecording) {
+          if (timerDuration > 0) {
+            let countdown = timerDuration;
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.style.display = 'block';
+            timerDisplay.textContent = countdown;
+
+            const countdownInterval = setInterval(() => {
+              try {
+                countdown--;
+                timerDisplay.textContent = countdown;
+
+                if (countdown <= 0) {
+                  clearInterval(countdownInterval);
+                  timerDisplay.style.display = 'none';
+                  startRecording();
+                  recordBtn.classList.add('recording');
+                }
+              } catch (error) {
+                console.error('Error during countdown:', error);
+                clearInterval(countdownInterval);
+              }
+            }, 1000);
+          } else {
+            startRecording();
+            recordBtn.classList.add('recording');
+          }
+        } else {
+          stopRecording();
+          recordBtn.classList.remove('recording');
+        }
+      } catch (error) {
+        console.error('Error in toggleRecording:', error);
+      }
+    }
+
+    // Ensure buttons remain visible
+    const timerBtn = document.querySelector('.timer-btn');
+    const recordBtn = document.getElementById('recordBtn');
+
+    // Ensure buttons are not hidden
+    timerBtn.style.display = 'block';
+    recordBtn.style.display = 'block';
+
+    // Modify startRecording to ensure it only starts when manually clicked
+    function startRecording() {
+      try {
+        if (!stream || isRecording) return; // Prevent multiple recordings
+
+        recordedChunks = [];
+        const options = { mimeType: 'video/webm' };
+
+        recorder = new MediaRecorder(stream, options);
+
+        recorder.ondataavailable = (event) => {
+          try {
+            if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          } catch (error) {
+            console.error('Error in recorder.ondataavailable:', error);
+          }
+        };
+
+        recorder.onstop = () => {
+          try {
+            console.log('Recording stopped.');
+          } catch (error) {
+            console.error('Error in recorder.onstop:', error);
+          }
+        };
+
+        recorder.start();
+        isRecording = true;
+
+        const audio = new Audio(`https://www.youtube.com/embed/${timeRange.videoId}?start=${timeRange.startTime}&end=${timeRange.endTime}`);
+        audio.play();
+
+        console.log('Recording started.');
+      } catch (error) {
+        console.error('Error in startRecording:', error);
+        alert('Failed to start recording. Please try again.');
+      }
+    }
+
+    // Function to stop recording
+    function stopRecording() {
+      try {
+        if (!recorder || recorder.state === 'inactive') return;
+
+        recorder.stop();
+        isRecording = false;
+      } catch (error) {
+        console.error('Error in stopRecording:', error);
+      }
+    }
+    
+    // Function to analyze dance performance and show results
+    function analyzeDancePerformance() {
+      // In a real app, this would send the recording to a server for AI analysis
+      // For now, we'll simulate the analysis with a timeout
+      
+      console.log("Analyzing dance performance...");
+      
+      // Create loading overlay
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.style.position = 'fixed';
+      loadingOverlay.style.top = '0';
+      loadingOverlay.style.left = '0';
+      loadingOverlay.style.width = '100%';
+      loadingOverlay.style.height = '100%';
+      loadingOverlay.style.background = 'rgba(0, 0, 0, 0.8)';
+      loadingOverlay.style.display = 'flex';
+      loadingOverlay.style.flexDirection = 'column';
+      loadingOverlay.style.justifyContent = 'center';
+      loadingOverlay.style.alignItems = 'center';
+      loadingOverlay.style.zIndex = '3000';
+      
+      const loadingText = document.createElement('div');
+      loadingText.textContent = 'Analyzing your dance moves...';
+      loadingText.style.color = '#fff';
+      loadingText.style.fontSize = '1.5rem';
+      loadingText.style.marginBottom = '20px';
+      
+      const progressContainer = document.createElement('div');
+      progressContainer.style.width = '80%';
+      progressContainer.style.maxWidth = '300px';
+      progressContainer.style.height = '10px';
+      progressContainer.style.background = '#333';
+      progressContainer.style.borderRadius = '5px';
+      progressContainer.style.overflow = 'hidden';
+      
+      const progressBar = document.createElement('div');
+      progressBar.style.width = '0%';
+      progressBar.style.height = '100%';
+      progressBar.style.background = 'linear-gradient(45deg, #ff3b5c, #ff713e)';
+      progressBar.style.transition = 'width 2s linear';
+      
+      progressContainer.appendChild(progressBar);
+      loadingOverlay.appendChild(loadingText);
+      loadingOverlay.appendChild(progressContainer);
+      document.body.appendChild(loadingOverlay);
+      
+      // Animate progress bar
+      setTimeout(() => {
+        progressBar.style.width = '100%';
+      }, 100);
+      
+      // Simulate AI analysis steps with detailed status updates
+      const analysisSteps = [
+        'Detecting key joint points...',
+        'Analyzing rhythm synchronization...',
+        'Evaluating movement precision...',
+        'Calculating energy level...',
+        'Assessing technique...',
+        'Generating recommendations...'
+      ];
+      
+      let stepIndex = 0;
+      const stepInterval = setInterval(() => {
+        if (stepIndex < analysisSteps.length) {
+          loadingText.textContent = analysisSteps[stepIndex];
+          stepIndex++;
+        } else {
+          clearInterval(stepInterval);
+          // Show results after all steps are complete
+          setTimeout(() => {
+            document.body.removeChild(loadingOverlay);
+            showResults();
+          }, 500);
+        }
+      }, 300);
+    }
+    
+    // Function to show results
+    function showResults() {
+      document.getElementById('resultsScreen').style.display = 'flex';
+    }
+    
+    // Function to close results
+    function closeResults() {
+      document.getElementById('resultsScreen').style.display = 'none';
+    }
+    
+    // Function to open timer modal
+    function openTimerModal() {
+      try {
+        document.getElementById('timerModal').style.display = 'flex';
+      } catch (error) {
+        console.error('Error in openTimerModal:', error);
+      }
+    }
+
+    // Function to close timer modal
+    function closeTimerModal() {
+      try {
+        document.getElementById('timerModal').style.display = 'none';
+      } catch (error) {
+        console.error('Error in closeTimerModal:', error);
+      }
+    }
+
+    // Function to set the timer duration
+    function setTimer(seconds) {
+      try {
+        timerDuration = seconds;
+        closeTimerModal();
+        alert(`Timer set to ${seconds} seconds.`);
+      } catch (error) {
+        console.error('Error in setTimer:', error);
+      }
+    }
+    
+    // Function to flip camera
+    function flipCamera() {
+      if (!stream) return;
+      
+      // Stop current stream
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Toggle facing mode
+      facingMode = facingMode === "user" ? "environment" : "user";
+      
+      // Reinitialize camera with new facing mode
+      initCamera();
+    }
+      // Function to go back to previous page
+    function goBack() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      
+      window.history.back();
+    }
+    
+    // Function to create a new battle
+    function createNewBattle() {
+      // Create modal for battle creation
+      const battleModal = document.createElement('div');
+      battleModal.style.position = 'fixed';
+      battleModal.style.top = '0';
+      battleModal.style.left = '0';
+      battleModal.style.width = '100%';
+      battleModal.style.height = '100%';
+      battleModal.style.background = 'rgba(0, 0, 0, 0.8)';
+      battleModal.style.display = 'flex';
+      battleModal.style.justifyContent = 'center';
+      battleModal.style.alignItems = 'center';
+      battleModal.style.zIndex = '3000';
+      
+      const battleForm = `
+       <div style="background: #222; border-radius: 15px; padding: 30px; width: 90%; max-width: 500px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 1.8rem; color: #ff3b5c;">Create a Dance Battle</h2>
+            <span style="font-size: 1.8rem; color: #ccc; cursor: pointer;" onclick="document.body.removeChild(this.parentNode.parentNode.parentNode);">&times;</span>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #ccc;">Battle Name</label>
+            <input id="newBattleName" type="text" style="width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem;" placeholder="Give your battle a catchy name">
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #ccc;">Battle Type</label>
+            <select id="newBattleType" style="width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem;">
+              <option value="">Select a battle type</option>
+              <option value="1v1">1v1 Battle</option>
+              <option value="group">Group Battle</option>
+              <option value="challenge">Weekly Challenge</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #ccc;">Song Selection</label>
+            <select id="newBattleSong" style="width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem;">
+              <option value="">Select a song</option>
+              <option value="thriller">Thriller - Michael Jackson</option>
+              <option value="dynamite">Dynamite - BTS</option>
+              <option value="savagem">Savage - Megan Thee Stallion</option>
+              <option value="levelUp">Level Up - Ciara</option>
+            </select>
+          </div>
+          <button style="width: 100%; padding: 15px; background: linear-gradient(45deg, #ff3b5c, #ff713e); color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer;" onclick="submitBattle()">Create Battle</button>
+        </div>
+      `;
+      
+      battleModal.innerHTML = battleForm;
+      document.body.appendChild(battleModal);
+      
+      // Add submitBattle function to window
+      window.submitBattle = function() {
+        const battleName = document.getElementById('newBattleName').value;
+        const battleType = document.getElementById('newBattleType').value;
+        const songSelection = document.getElementById('newBattleSong').value;
+        
+        if (!battleName || !battleType || !songSelection) {
+          alert('Please fill out all fields');
+          return;
+        }
+        
+        // Store battle info and redirect to battles page
+        localStorage.setItem('currentBattle', JSON.stringify({
+          name: battleName,
+          type: battleType,
+          song: songSelection,
+          duration: 3 // Default to 3 days
+        }));
+        
+        document.body.removeChild(battleModal);
+        window.location.href = '/battles';
+      };
+    }
+
+    // Function to toggle fullscreen
+    function toggleFullscreen() {
+      const container = document.getElementById('fullscreenContainer');
+      
+      if (!document.fullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) {
+          container.msRequestFullscreen();
+        }
+        document.querySelector('.fa-expand').classList.replace('fa-expand', 'fa-compress');
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+        document.querySelector('.fa-compress').classList.replace('fa-compress', 'fa-expand');
+      }
+    }
+
+    // Listen for fullscreen changes
+    document.addEventListener('fullscreenchange', function() {
+      const icon = document.querySelector('.fa-expand, .fa-compress');
+      if (document.fullscreenElement) {
+        icon.classList.replace('fa-expand', 'fa-compress');
+      } else {
+        icon.classList.replace('fa-compress', 'fa-expand');
+      }
+    });
+
+    // ...existing code...
   </script>
 </body>
 </html>

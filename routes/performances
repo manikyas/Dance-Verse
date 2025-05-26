@@ -1,20 +1,42 @@
 const express = require('express');
 const router = express.Router();
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 // MongoDB connection setup
 const uri = 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
 const dbName = 'danceapp';
 
-// Submit a performance
+// Submit a new performance
 router.post('/submit', async (req, res) => {
-  const { userId, choreographyId, score, feedback } = req.body;
+  const { choreographyId, videoId, startTime, endTime, rating, feedback } = req.body;
+  
   try {
     await client.connect();
     const db = client.db(dbName);
-    await db.collection('performances').insertOne({ userId, choreographyId, score, feedback });
-    res.send('Performance submitted successfully!');
+    
+    // Create performance object
+    const performance = {
+      userId: req.session.user,
+      choreographyId,
+      videoId,
+      startTime,
+      endTime,
+      rating: parseFloat(rating) || 0,
+      feedback,
+      scores: {
+        rhythm: parseFloat(req.body.rhythmScore) || 0,
+        movement: parseFloat(req.body.movementScore) || 0,
+        energy: parseFloat(req.body.energyScore) || 0,
+        technique: parseFloat(req.body.techniqueScore) || 0
+      },
+      date: new Date(),
+      thumbnail: req.body.thumbnail || null,
+      title: req.body.title || 'Dance Performance'
+    };
+    
+    await db.collection('performances').insertOne(performance);
+    res.redirect('/performances');
   } catch (err) {
     console.error(err);
     res.status(500).send('Error submitting performance');
@@ -23,16 +45,126 @@ router.post('/submit', async (req, res) => {
   }
 });
 
-// Get all performances
+// Get all performances for the current user
 router.get('/', async (req, res) => {
   try {
+    // Check if user is logged in
+    if (!req.session.user) {
+      return res.redirect('/auth/login');
+    }
+    
     await client.connect();
     const db = client.db(dbName);
-    const performances = await db.collection('performances').find().toArray();
-    res.render('performances', { title: 'Performances', performances });
+    
+    // Get performances for the current user
+    const performances = await db.collection('performances')
+      .find({ userId: req.session.user })
+      .sort({ date: -1 })
+      .toArray();
+    
+    // Add mock data for testing if no performances exist
+    if (performances.length === 0) {
+      // These are mock performances for UI testing
+      const mockPerformances = [
+        {
+          _id: new ObjectId(),
+          title: 'Thriller - Michael Jackson',
+          date: new Date(),
+          rating: 4.5,
+          feedback: 'Great energy and rhythm! Your footwork was excellent and you maintained good timing throughout the performance. Focus on smoother transitions between movements.',
+          thumbnail: '/images/michael-jackson.jpg'
+        },
+        {
+          _id: new ObjectId(),
+          title: 'Bad - Michael Jackson',
+          date: new Date(Date.now() - 604800000), // 1 week ago
+          rating: 3.8,
+          feedback: 'Good attempt! Your energy was high, but work on your timing with the beat. Try to make your movements more fluid.',
+          thumbnail: '/images/michael-jackson.jpg'
+        },
+        {
+          _id: new ObjectId(),
+          title: 'Dynamite - BTS',
+          date: new Date(Date.now() - 1209600000), // 2 weeks ago
+          rating: 4.2,
+          feedback: 'Nice work on following the choreography! Your timing was good but try to express more emotion in your facial expressions.',
+          thumbnail: '/images/michael-jackson.jpg'
+        }
+      ];
+      
+      res.render('performances', { 
+        title: 'Your Dance Performances', 
+        performances: mockPerformances
+      });
+    } else {
+      res.render('performances', { 
+        title: 'Your Dance Performances', 
+        performances: performances 
+      });
+    }
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error fetching performances');
+    res.status(500).render('error', { 
+      title: 'Error', 
+      error: 'Error fetching performances' 
+    });
+  } finally {
+    await client.close();
+  }
+});
+
+// Get details for a specific performance
+router.get('/:id', async (req, res) => {
+  try {
+    const performanceId = req.params.id;
+    
+    await client.connect();
+    const db = client.db(dbName);
+    
+    const performance = await db.collection('performances').findOne({ _id: new ObjectId(performanceId) });
+    
+    if (!performance) {
+      return res.status(404).render('error', { 
+        title: 'Not Found', 
+        error: 'Performance not found' 
+      });
+    }
+    
+    res.render('performance-details', { 
+      title: 'Performance Details', 
+      performance 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { 
+      title: 'Error', 
+      error: 'Error fetching performance details' 
+    });
+  } finally {
+    await client.close();
+  }
+});
+
+// Delete a performance
+router.post('/:id/delete', async (req, res) => {
+  try {
+    const performanceId = req.params.id;
+    
+    await client.connect();
+    const db = client.db(dbName);
+    
+    await db.collection('performances').deleteOne({ 
+      _id: new ObjectId(performanceId),
+      userId: req.session.user // Ensure only the owner can delete it
+    });
+    
+    res.redirect('/performances');
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { 
+      title: 'Error', 
+      error: 'Error deleting performance' 
+    });
   } finally {
     await client.close();
   }

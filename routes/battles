@@ -1,9 +1,70 @@
 const express = require('express');
 const router = express.Router();
+const { MongoClient } = require('mongodb');
 
-// Example route for battles
-router.get('/', (req, res) => {
-  res.send('Welcome to the Dance Battles!');
+// MongoDB connection setup
+const uri = 'mongodb://localhost:27017';
+const client = new MongoClient(uri);
+const dbName = 'danceapp';
+
+// Get all battles
+router.get('/', async (req, res) => {
+  try {
+    // In a real app, we would fetch battles from the database
+    // For now, we'll just render the battles page with mock data
+    res.render('battles', { 
+      title: 'Dance Battles',
+      user: req.session.user || null
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching battles');
+  }
+});
+
+// Create a new battle
+router.post('/create', async (req, res) => {
+  const { name, type, songId, duration } = req.body;
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const battle = {
+      name,
+      type,
+      songId,
+      duration,
+      createdBy: req.session.user,
+      createdAt: new Date(),
+      participants: [req.session.user],
+      status: 'active'
+    };
+    await db.collection('battles').insertOne(battle);
+    res.redirect('/battles');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error creating battle');
+  } finally {
+    await client.close();
+  }
+});
+
+// Join a battle
+router.post('/:id/join', async (req, res) => {
+  const battleId = req.params.id;
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    await db.collection('battles').updateOne(
+      { _id: battleId },
+      { $addToSet: { participants: req.session.user } }
+    );
+    res.redirect('/battles');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error joining battle');
+  } finally {
+    await client.close();
+  }
 });
 
 module.exports = router;

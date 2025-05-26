@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Dance Performances</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #ff3b5c, #ff713e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subheader {
+      color: #ccc;
+      font-size: 1.1rem;
+    }
+    
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 5px 5px 0 0;
+      transition: all 0.3s ease;
+      color: #ccc;
+    }
+    
+    .tab.active {
+      background: linear-gradient(to right, #ff3b5c, #ff713e);
+      color: #fff;
+    }
+    
+    .tab:hover:not(.active) {
+      background: #222;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .performance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .performance-card {
+      background: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    
+    .performance-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .performance-video {
+      position: relative;
+      height: 180px;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    .performance-video img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.7;
+    }
+    
+    .play-icon {
+      position: absolute;
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .play-icon:hover {
+      transform: scale(1.2);
+      color: #ff3b5c;
+    }
+    
+    .performance-details {
+      padding: 15px;
+    }
+    
+    .performance-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .performance-meta {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    
+    .rating {
+      color: gold;
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .progress-container {
+      margin-top: 5px;
+    }
+    
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #ccc;
+      margin-bottom: 3px;
+    }
+    
+    .progress-bar {
+      height: 5px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background: linear-gradient(to right, #ff3b5c, #ff713e);
+      border-radius: 5px;
+    }
+    
+    .stat-summary {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      padding: 20px 0;
+      background: #1a1a1a;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ff3b5c;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    
+    .feedback-list {
+      margin-top: 20px;
+    }
+    
+    .feedback-item {
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+    
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .feedback-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .feedback-date {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    
+    .feedback-content {
+      color: #ccc;
+      line-height: 1.5;
+    }
+    
+    .improvement-points {
+      margin-top: 15px;
+    }
+    
+    .improvement-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #ff713e;
+    }
+    
+    .improvement-list {
+      list-style-type: none;
+    }
+    
+    .improvement-list li {
+      margin-bottom: 5px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .improvement-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #ff3b5c;
+    }
+    
+    .no-performances {
+      text-align: center;
+      padding: 40px 0;
+      color: #888;
+      font-size: 1.2rem;
+    }
+    
+    .cta-button {
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: #fff;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      display: block;
+      margin: 30px auto;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      width: fit-content;
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(255, 59, 92, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Your Dance Performances</h1>
+      <p class="subheader">Track your progress and improvements over time</p>
+    </header>
+    
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('performances')">Performances</div>
+      <div class="tab" onclick="showTab('feedback')">Feedback</div>
+      <div class="tab" onclick="showTab('progress')">Progress</div>
+    </div>
+    
+    <div id="performances" class="tab-content active">
+      <div class="performance-grid">
+        <% if (performances && performances.length > 0) { %>
+          <% performances.forEach(performance => { %>
+            <div class="performance-card">
+              <div class="performance-video">
+                <img src="<%= performance.thumbnail || '/images/michael-jackson.jpg' %>" alt="Performance Thumbnail">
+                <div class="play-icon"><i class="fas fa-play-circle"></i></div>
+              </div>
+              <div class="performance-details">
+                <div class="performance-title"><%= performance.title %></div>
+                <div class="performance-meta"><%= new Date(performance.date).toLocaleDateString() %></div>
+                <div class="rating">
+                  <% for(let i = 0; i < Math.floor(performance.rating); i++) { %>
+                    <i class="fas fa-star"></i>
+                  <% } %>
+                  <% if (performance.rating % 1 !== 0) { %>
+                    <i class="fas fa-star-half-alt"></i>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="no-performances">
+            <p>You haven't recorded any performances yet.</p>
+            <a href="/ratings" class="cta-button">Start Dancing</a>
+          </div>
+        <% } %>
+      </div>
+      
+      <a href="/ratings" class="cta-button">Record New Performance</a>
+    </div>
+    
+    <div id="feedback" class="tab-content">
+      <div class="feedback-list">
+        <% if (performances && performances.length > 0) { %>
+          <% performances.forEach(performance => { %>
+            <div class="feedback-item">
+              <div class="feedback-header">
+                <div class="feedback-title"><%= performance.title %></div>
+                <div class="feedback-date"><%= new Date(performance.date).toLocaleDateString() %></div>
+              </div>
+              <div class="feedback-content">
+                <p><%= performance.feedback %></p>
+                <div class="improvement-points">
+                  <div class="improvement-title">Points to Improve</div>
+                  <ul class="improvement-list">
+                    <li>Work on maintaining consistent arm positions during turns</li>
+                    <li>Focus on smoother transitions between movement sequences</li>
+                    <li>Try to add more dynamic variations in your footwork</li>
+                    <li>Practice keeping timing with the beat during faster sections</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="no-performances">
+            <p>No feedback available yet. Record your first dance to get AI feedback!</p>
+            <a href="/ratings" class="cta-button">Start Dancing</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+    
+    <div id="progress" class="tab-content">
+      <div class="stat-summary">
+        <div class="stat-item">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Total Performances</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">4.2</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">+15%</div>
+          <div class="stat-label">Improvement</div>
+        </div>
+      </div>
+      
+      <h3>Skill Progress</h3>
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Rhythm</span>
+          <span>78%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" style="width: 78%"></div>
+        </div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Technique</span>
+          <span>65%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" style="width: 65%"></div>
+        </div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Expression</span>
+          <span>82%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" style="width: 82%"></div>
+        </div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Timing</span>
+          <span>70%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress" style="width: 70%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      // Hide all tab contents
+      const tabContents = document.getElementsByClassName('tab-content');
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove('active');
+      }
+      
+      // Remove active class from all tabs
+      const tabs = document.getElementsByClassName('tab');
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove('active');
+      }
+      
+      // Show the selected tab content
+      document.getElementById(tabId).classList.add('active');
+      
+      // Add active class to the clicked tab
+      const clickedTab = document.querySelector(`.tab[onclick="showTab('${tabId}')"]`);
+      clickedTab.classList.add('active');
+    }
+  </script>
+</body>
+</html>
