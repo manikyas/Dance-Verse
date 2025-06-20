@@ -355,11 +355,16 @@
       transition: all 0.3s ease;
       border: 2px solid transparent;
     }
-    
-    .song-option:hover,
+      .song-option:hover,
     .song-option.selected {
       border-color: #ff3b5c;
       background: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 59, 92, 0.3);
+    }
+    
+    .song-option.selected {
+      background: linear-gradient(45deg, rgba(255, 59, 92, 0.1), rgba(255, 113, 62, 0.1));
     }
     
     .song-option img {
@@ -471,6 +476,90 @@
       color: #444;
     }
 
+    /* Battle Code Display Styles */
+    .battle-code-display {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .battle-code-display h3 {
+      color: #ff713e;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+    
+    .code-display {
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: white;
+      font-size: 2.5rem;
+      font-weight: bold;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      letter-spacing: 0.5rem;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 8px 25px rgba(255, 59, 92, 0.3);
+    }
+    
+    .code-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    .copy-btn, .share-btn {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .copy-btn:hover {
+      background: #555;
+      transform: translateY(-2px);
+    }
+    
+    .share-btn:hover {
+      background: #555;
+      transform: translateY(-2px);
+    }
+    
+    .battle-code-display p {
+      color: #888;
+      margin: 15px 0;
+      font-size: 1.1rem;
+    }
+
+    /* Battle Code Input Field Styles */
+    #battleCode {
+      text-transform: uppercase;
+      font-size: 1.5rem;
+      text-align: center;
+      letter-spacing: 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      padding: 15px;
+      border: 2px solid #ff713e;
+      border-radius: 10px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    
+    #battleCode:focus {
+      outline: none;
+      border-color: #ff3b5c;
+      box-shadow: 0 0 15px rgba(255, 59, 92, 0.3);
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .container {
@@ -494,6 +583,33 @@
         grid-template-columns: 1fr;
       }
     }
+
+    .song-option.spotify-track.selected {
+      border-color: #ff3b5c;
+      background: linear-gradient(45deg, rgba(255, 59, 92, 0.1), rgba(255, 113, 62, 0.1));
+      transform: translateY(-1px);
+    }
+    
+    .song-option.spotify-track.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff3b5c;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    
+    .song-option.spotify-track {
+      position: relative;
+    }
   </style>
 </head>
 <body>
@@ -506,9 +622,7 @@
     <header>
       <h1><i class="fas fa-trophy"></i> Dance Battles</h1>
       <p>Challenge dancers worldwide and prove your moves!</p>
-    </header>
-
-    <!-- Battle Modes -->
+    </header>    <!-- Battle Modes -->
     <div class="battle-modes">
       <div class="battle-mode" onclick="openCreateBattleModal()">
         <div class="icon"><i class="fas fa-plus-circle"></i></div>
@@ -517,11 +631,11 @@
         <button class="battle-btn">Create New Battle</button>
       </div>
       
-      <div class="battle-mode" onclick="showRandomBattle()">
-        <div class="icon"><i class="fas fa-random"></i></div>
-        <h3>Quick Battle</h3>
-        <p>Jump into a random battle instantly! Perfect for warming up or when you're feeling spontaneous.</p>
-        <button class="battle-btn">Start Quick Battle</button>
+      <div class="battle-mode" onclick="openJoinBattleModal()">
+        <div class="icon"><i class="fas fa-sign-in-alt"></i></div>
+        <h3>Join Battle</h3>
+        <p>Enter a battle code to join a friend's battle! Get the code from your friend and jump into the competition.</p>
+        <button class="battle-btn">Join Battle</button>
       </div>
       
       <div class="battle-mode" onclick="showTournaments()">
@@ -726,6 +840,57 @@
     </div>
   </div>
 
+  <!-- Join Battle Modal -->
+  <div class="modal" id="joinBattleModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Join Battle</div>
+        <div class="close-modal" onclick="closeJoinBattleModal()">&times;</div>
+      </div>
+      
+      <form id="joinBattleForm" onsubmit="joinBattleWithCode(event)">
+        <div class="form-group">
+          <label for="battleCode">Battle Code</label>
+          <input type="text" id="battleCode" name="battleCode" placeholder="Enter 6-digit battle code..." maxlength="6" style="text-transform: uppercase; font-size: 1.5rem; text-align: center; letter-spacing: 0.5rem;" required>
+          <small style="color: #888; margin-top: 5px; display: block;">Ask your friend for their battle code</small>
+        </div>
+        
+        <button type="submit" class="create-battle-btn">
+          <i class="fas fa-sign-in-alt"></i> Join Battle
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Battle Code Success Modal -->
+  <div class="modal" id="battleCodeModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Battle Created Successfully!</div>
+        <div class="close-modal" onclick="closeBattleCodeModal()">&times;</div>
+      </div>
+      
+      <div class="battle-code-display">
+        <h3>Your Battle Code:</h3>
+        <div class="code-display" id="generatedBattleCode">ABC123</div>
+        <p>Share this code with friends so they can join your battle!</p>
+        
+        <div class="code-actions">
+          <button onclick="copyBattleCode()" class="copy-btn">
+            <i class="fas fa-copy"></i> Copy Code
+          </button>
+          <button onclick="shareBattleCode()" class="share-btn">
+            <i class="fas fa-share"></i> Share Code
+          </button>
+        </div>
+        
+        <button onclick="startBattleFromCode()" class="create-battle-btn">
+          <i class="fas fa-play"></i> Start Battle Now
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let selectedSong = null;
     
@@ -745,7 +910,16 @@
         option.classList.remove('selected');
       });
     }
+      function openJoinBattleModal() {
+      document.getElementById('joinBattleModal').style.display = 'flex';
+    }
+    
+    function closeJoinBattleModal() {
+      document.getElementById('joinBattleModal').style.display = 'none';
+    }
       function selectSong(videoId, title, image, element) {
+      console.log('Song selected:', { videoId, title, image });
+      
       // Clear previous selections
       document.querySelectorAll('.song-option').forEach(option => {
         option.classList.remove('selected');
@@ -754,6 +928,8 @@
       // Select current song
       element.classList.add('selected');
       selectedSong = { videoId, title, image };
+      
+      console.log('Selected song updated:', selectedSong);
     }
 
     // Spotify Search Functions
@@ -801,9 +977,7 @@
           document.getElementById('searchLoading').style.display = 'none';
         }
       }, 500);
-    }
-
-    function displaySearchResults(tracks, query) {
+    }    function displaySearchResults(tracks, query) {
       const resultsContainer = document.getElementById('spotifyResults');
       
       if (!tracks || tracks.length === 0) {
@@ -824,8 +998,13 @@
         const image = track.image || '/images/default-song.jpg';
         const title = `${track.name} - ${track.artist}`;
         
+        // Escape quotes and special characters for safe onclick handling
+        const escapedVideoId = videoId.replace(/'/g, "\\'");
+        const escapedTitle = title.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        const escapedImage = image.replace(/'/g, "\\'");
+        
         html += `
-          <div class="song-option spotify-track" onclick="selectSong('${videoId}', '${title}', '${image}', this)">
+          <div class="song-option spotify-track" data-video-id="${escapedVideoId}" data-title="${escapedTitle}" data-image="${escapedImage}">
             <img src="${image}" alt="${track.name}" onerror="this.src='/images/default-song.jpg'">
             <div class="song-info">
               <div class="song-title">${track.name}</div>
@@ -836,6 +1015,16 @@
       });
 
       resultsContainer.innerHTML = html;
+      
+      // Add click event listeners after creating the HTML
+      document.querySelectorAll('.song-option.spotify-track').forEach(option => {
+        option.addEventListener('click', function() {
+          const videoId = this.getAttribute('data-video-id');
+          const title = this.getAttribute('data-title');
+          const image = this.getAttribute('data-image');
+          selectSong(videoId, title, image, this);
+        });
+      });
     }
 
     function showDefaultSongs() {
@@ -868,8 +1057,9 @@
           <div>Error searching Spotify</div>
           <div style="font-size: 0.8rem; margin-top: 8px;">Please try again later</div>
         </div>
-      `;
-    }    function generateVideoId(songName, artistName) {
+      `;    }
+    
+    function generateVideoId(songName, artistName) {
       // Simple hash function to generate consistent IDs
       const str = `${songName} ${artistName}`.toLowerCase();
       let hash = 0;
@@ -880,8 +1070,7 @@
       }
       return Math.abs(hash).toString(36).substring(0, 11);
     }
-    
-    function submitBattle(event) {
+      function submitBattle(event) {
       event.preventDefault();
       
       if (!selectedSong) {
@@ -898,12 +1087,17 @@
         duration: parseInt(formData.get('battleDuration'))
       };
       
-      // Simulate battle creation
-      alert('Battle created successfully! Other dancers can now join.');
-      closeCreateBattleModal();
+      // Generate a random 6-character battle code
+      const battleCode = generateBattleCode();
       
-      // In a real app, you would send this data to the server
-      console.log('Battle created:', battleData);
+      // Store battle data with code (in a real app, send to server)
+      storeBattleData(battleCode, battleData);
+      
+      // Close create modal and show battle code modal
+      closeCreateBattleModal();
+      showBattleCodeModal(battleCode);
+      
+      console.log('Battle created:', battleData, 'Code:', battleCode);
     }
     
     function joinBattle(battleId) {
@@ -920,15 +1114,103 @@
         window.location.href = `/camera?videoId=${battle.videoId}&range=${battle.range}&mode=battle&battleId=${battleId}`;
       }
     }
-    
-    function showRandomBattle() {
-      const randomBattles = ['battle1', 'battle2', 'battle3', 'battle4'];
-      const randomBattle = randomBattles[Math.floor(Math.random() * randomBattles.length)];
-      joinBattle(randomBattle);
+      function showTournaments() {
+      alert('Tournaments feature coming soon! Join individual battles for now.');
+    }
+
+    // Generate a random 6-character battle code
+    function generateBattleCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
     }
     
-    function showTournaments() {
-      alert('Tournaments feature coming soon! Join individual battles for now.');
+    // Store battle data (in a real app, this would be saved to a database)
+    function storeBattleData(code, battleData) {
+      const battles = JSON.parse(localStorage.getItem('battles') || '{}');
+      battles[code] = {
+        ...battleData,
+        createdAt: new Date().toISOString(),
+        participants: []
+      };
+      localStorage.setItem('battles', JSON.stringify(battles));
+    }
+    
+    // Show the battle code modal
+    function showBattleCodeModal(battleCode) {
+      document.getElementById('generatedBattleCode').innerText = battleCode;
+      document.getElementById('battleCodeModal').style.display = 'flex';
+    }
+    
+    // Close battle code modal
+    function closeBattleCodeModal() {
+      document.getElementById('battleCodeModal').style.display = 'none';
+    }
+    
+    // Copy battle code to clipboard
+    function copyBattleCode() {
+      const codeDisplay = document.getElementById('generatedBattleCode');
+      const battleCode = codeDisplay.innerText;
+      
+      // Use the Clipboard API if available
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(battleCode).then(() => {
+          alert('Battle code copied to clipboard!');
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+          fallbackCopy(battleCode);
+        });
+      } else {
+        fallbackCopy(battleCode);
+      }
+    }
+    
+    // Fallback copy method
+    function fallbackCopy(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        alert('Battle code copied to clipboard!');
+      } catch (err) {
+        alert(`Copy failed. Battle code: ${text}`);
+      }
+      document.body.removeChild(textArea);
+    }
+    
+    // Join battle with code
+    function joinBattleWithCode(event) {
+      event.preventDefault();
+      
+      const battleCode = document.getElementById('battleCode').value.toUpperCase();
+      
+      if (battleCode.length !== 6) {
+        alert('Please enter a valid 6-character battle code.');
+        return;
+      }
+      
+      // Check if battle exists (in a real app, check with server)
+      const battles = JSON.parse(localStorage.getItem('battles') || '{}');
+      
+      if (battles[battleCode]) {
+        const battle = battles[battleCode];
+        closeJoinBattleModal();
+        
+        // Redirect to camera page with battle data
+        if (battle.song && battle.song.videoId) {
+          // For now, use default time range, but in a real app you'd get this from battle data
+          window.location.href = `/camera?videoId=${battle.song.videoId}&range=0-60&mode=battle&battleId=${battleCode}`;
+        } else {
+          window.location.href = `/camera?mode=battle&battleId=${battleCode}`;
+        }
+      } else {
+        alert('Battle not found. Please check the code and try again.');
+      }
     }
   </script>
 </body>

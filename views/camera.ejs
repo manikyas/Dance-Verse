@@ -861,17 +861,18 @@
     let isRecording = false;
     let countdownTimer;
     let poseDetection = false;
-    let poseNet;    let timerInterval;
-    let facingMode = "user"; // front camera by default
-    let timeRange = { startTime: 0, endTime: 60 };
+    let poseNet;
+    let timerInterval;    let facingMode = "user"; // front camera by default
     
+    let timeRange = { startTime: 0, endTime: 60 };
     // Timer configuration
     const defaultTimerDuration = 0; // No countdown timer by default - users can set one if they want
     let timerDuration = defaultTimerDuration; // Timer duration in seconds
     
     // Battle mode variables
     let isBattleMode = false;
-    let battleId = null;    let battleMode = null;
+    let battleId = null;
+    let battleMode = null;
 
     // Initialize the camera when page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -898,23 +899,17 @@
       const savedChoreography = localStorage.getItem('selectedTimeRange');
       if (savedChoreography) {
         try {
-          const choreography = JSON.parse(savedChoreography);          console.log('Found choreography data in localStorage:', choreography);
+          const choreography = JSON.parse(savedChoreography);
+          console.log('Found choreography data in localStorage:', choreography);
           
-          // Validate the data before using it
-          if (choreography.startTime !== undefined && choreography.endTime !== undefined) {
-            // Use localStorage data to skip time selection
-            skipTimeSelection = true;
-            timeRange.startTime = choreography.startTime;
-            timeRange.endTime = choreography.endTime;
-            timeRange.videoId = choreography.videoId || '';
-            
-            console.log('Using localStorage data - skipping time selection:', timeRange);
-            
-            // Clear the localStorage since we're using it
-            localStorage.removeItem('selectedTimeRange');
-          } else {
-            console.warn('localStorage data is incomplete, will show time selection');
-          }
+          // Use localStorage data to skip time selection
+          skipTimeSelection = true;
+          timeRange.startTime = choreography.startTime;
+          timeRange.endTime = choreography.endTime;
+          timeRange.videoId = choreography.videoId || '';
+          
+          // Clear the localStorage since we're using it
+          localStorage.removeItem('selectedTimeRange');
         } catch (e) {
           console.error('Error parsing choreography data from localStorage', e);
         }
@@ -1008,10 +1003,10 @@
       
       // 4. Hide the main "Initializing Dance Studio" loading overlay proactively.
       if (loadingOverlay && loadingOverlay.style.display !== 'none') {
-        loadingOverlay.style.opacity = '0';
-        setTimeout(() => {
+        loadingOverlay.style.opacity = '0';        setTimeout(() => {
           loadingOverlay.style.display = 'none';
-        }, 500);        clearTimeout(loadingTimeoutFallback); // Clear the longer fallback
+        }, 500);
+        clearTimeout(loadingTimeoutFallback); // Clear the longer fallback
       }
     });
 

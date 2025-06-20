@@ -5,12 +5,22 @@ const router = express.Router();
 router.get('/', (req, res) => {
   const videoId = req.query.videoId || '';
   const range = req.query.range || '0-60'; // Default is 0-60 seconds
+  const mode = req.query.mode || '';
+  const battleId = req.query.battleId || '';
+  const code = req.query.code || '';
   
-  // Allow access even without videoId - time range might be in localStorage
+  // Allow access if it's battle mode or if videoId is provided
+  if (!videoId && mode !== 'battle' && !code) {
+    return res.redirect('/ratings');
+  }
+  
   res.render('camera', { 
-    title: 'Dance Recording Studio',
+    title: mode === 'battle' ? 'Dance Battle Recording' : 'Dance Recording Studio',
     videoId, 
-    range
+    range,
+    mode,
+    battleId,
+    code
   });
 });
 
