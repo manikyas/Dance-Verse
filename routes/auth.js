@@ -8,7 +8,8 @@ router.get('/signup', (req, res) => {
 
 // Render the login page
 router.get('/login', (req, res) => {
-  res.render('login', { title: 'Login' });
+  const redirect = req.query.redirect || '/';
+  res.render('login', { title: 'Login', redirect: redirect });
 });
 
 // Handle signup form submission
@@ -22,10 +23,19 @@ router.post('/signup', (req, res) => {
 // Handle login form submission
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
+  const redirect = req.body.redirect || '/';
   // Add logic to authenticate user
   console.log(`User login: ${username}`);
   req.session.user = username; // Save user in session
-  res.redirect('/'); // Redirect to home page after login
+  
+  // Redirect to the specified page or home page after login
+  if (redirect === 'battles') {
+    res.redirect('/battles');
+  } else if (redirect.startsWith('/')) {
+    res.redirect(redirect);
+  } else {
+    res.redirect('/');
+  }
 });
 
 // Handle logout

@@ -423,8 +423,10 @@
       
       <div class="login-form-container">
         <h1>Login to Your Account</h1>
-        
-        <form action="/auth/login" method="POST">
+          <form action="/auth/login" method="POST">
+          <% if (typeof redirect !== 'undefined') { %>
+            <input type="hidden" name="redirect" value="<%= redirect %>">
+          <% } %>
           <div class="form-group">
             <input type="text" id="username" name="username" class="form-control" required>
             <label for="username">Username</label>

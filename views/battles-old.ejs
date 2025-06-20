@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dance Battles</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px 0;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      border-radius: 15px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/images/michael-jackson.jpg') center center;
+      opacity: 0.15;
+      z-index: 0;
+    }
+    
+    header h1 {
+      position: relative;
+      font-size: 3rem;
+      margin: 0;
+      z-index: 1;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    
+    header p {
+      position: relative;
+      font-size: 1.2rem;
+      margin-top: 10px;
+      z-index: 1;
+    }
+    
+    .battle-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .battle-card {
+      background: #1a1a1a;
+      border-radius: 15px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .battle-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(255, 59, 92, 0.3);
+    }
+    
+    .battle-image {
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    
+    .battle-image::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    }
+    
+    .battle-content {
+      padding: 20px;
+    }
+    
+    .battle-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #ff3b5c;
+    }
+    
+    .battle-description {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    
+    .battle-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #888;
+    }
+    
+    .battle-stats span {
+      display: flex;
+      align-items: center;
+    }
+    
+    .battle-stats i {
+      margin-right: 5px;
+    }
+    
+    .leaderboard {
+      background: #1a1a1a;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .section-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #ff3b5c;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      margin-right: 10px;
+    }
+    
+    .leaderboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .leaderboard-item {
+      background: #2a2a2a;
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .rank {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ff3b5c;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-right: 15px;
+    }
+    
+    .rank.gold {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+    }
+    
+    .rank.silver {
+      background: linear-gradient(135deg, #C0C0C0, #A9A9A9);
+    }
+    
+    .rank.bronze {
+      background: linear-gradient(135deg, #CD7F32, #A0522D);
+    }
+    
+    .user-details {
+      flex: 1;
+    }
+    
+    .user-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .user-score {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    
+    .create-battle {
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      text-align: center;
+      cursor: pointer;
+      display: inline-block;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+      border: none;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(255, 59, 92, 0.4);
+    }
+    
+    .create-battle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 59, 92, 0.6);
+    }
+    
+    .cta-container {
+      text-align: center;
+    }
+    
+    /* Battle Creation Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: #222;
+      border-radius: 15px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.8rem;
+      color: #ccc;
+      cursor: pointer;
+    }
+    
+    .modal-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #ff3b5c;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #ccc;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      background: #333;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(45deg, #ff3b5c, #ff713e);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Dance Battles</h1>
+      <p>Challenge friends and dancers worldwide to show off your skills</p>
+    </header>
+    
+    <div class="battle-types">
+      <div class="battle-card" onclick="openModal()">
+        <div class="battle-image" style="background-image: url('/images/michael-jackson.jpg');"></div>
+        <div class="battle-content">
+          <h3 class="battle-title">1v1 Battle</h3>
+          <p class="battle-description">Challenge a specific dancer to a one-on-one battle. Choose a song and choreography to compete on.</p>
+          <div class="battle-stats">
+            <span><i class="fas fa-users"></i> 46 active</span>
+            <span><i class="fas fa-trophy"></i> Top prize: 500 points</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="battle-card" onclick="openModal()">
+        <div class="battle-image" style="background-image: url('/images/michael-jackson.jpg');"></div>
+        <div class="battle-content">
+          <h3 class="battle-title">Group Battle</h3>
+          <p class="battle-description">Join a group battle with multiple dancers. Show your skills and get rated by all participants.</p>
+          <div class="battle-stats">
+            <span><i class="fas fa-users"></i> 23 active</span>
+            <span><i class="fas fa-trophy"></i> Top prize: 1200 points</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="battle-card" onclick="openModal()">
+        <div class="battle-image" style="background-image: url('/images/michael-jackson.jpg');"></div>
+        <div class="battle-content">
+          <h3 class="battle-title">Weekly Challenge</h3>
+          <p class="battle-description">Join this week's dance challenge. New theme every Monday, winners announced Sunday.</p>
+          <div class="battle-stats">
+            <span><i class="fas fa-users"></i> 89 active</span>
+            <span><i class="fas fa-trophy"></i> Top prize: 2000 points</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="leaderboard">
+      <h2 class="section-title"><i class="fas fa-trophy"></i> Leaderboard</h2>
+      <div class="leaderboard-grid">
+        <div class="leaderboard-item">
+          <div class="rank gold">1</div>
+          <div class="user-details">
+            <div class="user-name">DanceKing92</div>
+            <div class="user-score">9,876 points</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="rank silver">2</div>
+          <div class="user-details">
+            <div class="user-name">MoveQueen</div>
+            <div class="user-score">8,543 points</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="rank bronze">3</div>
+          <div class="user-details">
+            <div class="user-name">BreakDancer21</div>
+            <div class="user-score">7,821 points</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="rank">4</div>
+          <div class="user-details">
+            <div class="user-name">HipHopStar</div>
+            <div class="user-score">6,754 points</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="rank">5</div>
+          <div class="user-details">
+            <div class="user-name">PopLockMaster</div>
+            <div class="user-score">5,932 points</div>
+          </div>
+        </div>
+        
+        <div class="leaderboard-item">
+          <div class="rank">6</div>
+          <div class="user-details">
+            <div class="user-name">SalsaQueen</div>
+            <div class="user-score">5,127 points</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cta-container">
+      <button class="create-battle" onclick="openModal()">Create a Battle</button>
+    </div>
+  </div>
+
+  <!-- Battle Creation Modal -->
+  <div class="modal" id="battleModal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+      <h2 class="modal-title">Create a Dance Battle</h2>
+      
+      <form id="battleForm">
+        <div class="form-group">
+          <label for="battleName">Battle Name</label>
+          <input type="text" id="battleName" required placeholder="Give your battle a catchy name">
+        </div>
+        
+        <div class="form-group">
+          <label for="battleType">Battle Type</label>
+          <select id="battleType" required>
+            <option value="">Select a battle type</option>
+            <option value="1v1">1v1 Battle</option>
+            <option value="group">Group Battle</option>
+            <option value="challenge">Weekly Challenge</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="songSelection">Song Selection</label>
+          <select id="songSelection" required>
+            <option value="">Select a song</option>
+            <option value="thriller">Thriller - Michael Jackson</option>
+            <option value="dynamite">Dynamite - BTS</option>
+            <option value="savage">Savage - Megan Thee Stallion</option>
+            <option value="levelUp">Level Up - Ciara</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="battleDuration">Battle Duration (days)</label>
+          <select id="battleDuration" required>
+            <option value="1">1 day</option>
+            <option value="3" selected>3 days</option>
+            <option value="7">7 days</option>
+          </select>
+        </div>
+        
+        <button type="button" class="submit-btn" onclick="createBattle()">Create Battle</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Function to open modal
+    function openModal() {
+      document.getElementById('battleModal').style.display = 'flex';
+    }
+    
+    // Function to close modal
+    function closeModal() {
+      document.getElementById('battleModal').style.display = 'none';
+    }
+      // Function to create a battle
+    function createBattle() {
+      const battleName = document.getElementById('battleName').value;
+      const battleType = document.getElementById('battleType').value;
+      const songSelection = document.getElementById('songSelection').value;
+      const battleDuration = document.getElementById('battleDuration').value;
+      
+      if (!battleName || !battleType || !songSelection || !battleDuration) {
+        alert('Please fill out all fields');
+        return;
+      }
+      
+      // Store battle info in localStorage
+      localStorage.setItem('currentBattle', JSON.stringify({
+        name: battleName,
+        type: battleType,
+        song: songSelection,
+        duration: battleDuration
+      }));
+      
+      // Here you would typically send this data to the server via an API call
+      alert(`Battle "${battleName}" created successfully! It will be active for ${battleDuration} days.`);
+      
+      closeModal();
+      
+      // Reset form
+      document.getElementById('battleForm').reset();
+      
+      // Redirect to camera to record battle entry
+      setTimeout(() => {
+        window.location.href = '/camera';
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

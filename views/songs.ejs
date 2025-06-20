@@ -187,8 +187,7 @@
       margin-bottom: 15px;
       display: -webkit-box;
       -webkit-line-clamp: 1;
-      line-clamp: 1;
-      line-clamp: 1;
+      /* line-clamp is not a standard property, so it is removed */
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -718,14 +717,15 @@
   </div>
   
   <!-- Animated music notes -->
+  <% const notes = ['♪', '♫', '♬', '♩']; %>
   <div class="music-notes">
     <% for (let i = 1; i <= 10; i++) { %>
-      <div class="note" style="
-        left: <%= Math.random() * 100 %>%; 
-        animation-duration: <%= 5 + Math.random() * 8 %>s; 
-        animation-delay: <%= Math.random() * 5 %>s;
-      ">
-        <% const notes = ['♪', '♫', '♬', '♩']; %>
+      <% 
+        const left = Math.random() * 100;
+        const duration = 5 + Math.random() * 8;
+        const delay = Math.random() * 5;
+      %>
+      <div class="note" style="left: <%= typeof left !== 'undefined' && !isNaN(left) ? left : 0 %>%; animation-duration: <%= typeof duration !== 'undefined' && !isNaN(duration) ? duration : 10 %>s; animation-delay: <%= typeof delay !== 'undefined' && !isNaN(delay) ? delay : 0 %>s;">
         <%= notes[Math.floor(Math.random() * notes.length)] %>
       </div>
     <% } %>

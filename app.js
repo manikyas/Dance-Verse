@@ -44,8 +44,14 @@ app.use('/auth', authRoutes);
 // Allow public access to certain routes without authentication
 const songRoutes = require('./routes/songs');
 const choreographyRoutes = require('./routes/choreographies');
+const battleRoutes = require('./routes/battles');
+const cameraRoutes = require('./routes/camera');
+const spotifyRoutes = require('./routes/spotify');
 app.use('/songs', songRoutes);
 app.use('/choreographies', choreographyRoutes);
+app.use('/battles', battleRoutes);
+app.use('/camera', cameraRoutes);
+app.use('/spotify', spotifyRoutes);
 
 // Protect the home page and other routes
 const indexRoutes = require('./routes/index');
@@ -53,15 +59,11 @@ app.use('/', checkAuth, indexRoutes);
 
 // Import additional routes
 const performanceRoutes = require('./routes/performances');
-const battleRoutes = require('./routes/battles');
 const ratingsRoutes = require('./routes/ratings');
-const cameraRoutes = require('./routes/camera');
 
 // Use additional routes (these require authentication)
 app.use('/performances', checkAuth, performanceRoutes);
-app.use('/battles', checkAuth, battleRoutes);
 app.use('/ratings', checkAuth, ratingsRoutes);
-app.use('/camera', checkAuth, cameraRoutes);
 
 // Import external API routes
 const externalRoutes = require('./routes/external');
@@ -70,11 +72,6 @@ app.use('/external', externalRoutes);
 // Route to render the play page
 app.get('/play', (req, res) => {
   res.render('play', { title: 'Play Video', videoId: 'your_video_id_here' });
-});
-
-// Route to render the camera page
-app.get('/camera', (req, res) => {
-  res.render('camera');
 });
 
 // 404 handler

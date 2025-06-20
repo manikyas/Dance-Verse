@@ -383,8 +383,7 @@
       color: #fff;
       text-align: center;
     }
-    
-    .battles-btn {
+      .battles-btn {
       background: linear-gradient(45deg, #ff3b5c, #ff713e);
       color: #fff;
       padding: 15px;
@@ -395,6 +394,60 @@
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 1px;
+    }
+    
+    /* Battle-specific styles */
+    .battle-result {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .battle-result.victory {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      color: #000;
+      animation: victory-pulse 2s infinite;
+    }
+    
+    .battle-result.close {
+      background: linear-gradient(45deg, #FF6B35, #F7931E);
+      color: #fff;
+      animation: close-battle-glow 2s infinite;
+    }
+    
+    .battle-result.defeat {
+      background: linear-gradient(45deg, #6C5CE7, #A29BFE);
+      color: #fff;
+      animation: defeat-encourage 2s infinite;
+    }
+    
+    .overall-score {
+      font-size: 3rem;
+      font-weight: bold;
+      text-align: center;
+      color: #ff3b5c;
+      margin: 15px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    @keyframes victory-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    @keyframes close-battle-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(255, 107, 53, 0.8); }
+    }
+    
+    @keyframes defeat-encourage {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
     }
     
     .time-selection-section {
@@ -631,12 +684,12 @@
     <div class="loading-text">Initializing Dance Studio...</div>
     <button onclick="forceHideLoading()" style="margin-top: 30px; padding: 12px 25px; background: #ff3b5c; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">Continue Anyway</button>
   </div>
-  
-  <script>
+    <script>
     // Force hide the loading overlay if it gets stuck
     function forceHideLoading() {
       document.getElementById('loadingOverlay').style.display = 'none';
-      document.getElementById('cameraContainer').style.display = 'flex';
+      // Don't force camera container to show - let the initialization logic handle it
+      // This prevents bypassing the time selection screen
     }
     
     // Auto-hide loading after 8 seconds as a fallback
@@ -647,24 +700,37 @@
       }
     }, 8000);
   </script>
-
-  <!-- Time Selection Section removed as it's no longer needed -->
+  <!-- Time Selection Section -->
   <div class="time-selection-section" id="timeSelectionSection">
-    <!-- This section is intentionally hidden as time selection is now handled on the choreographies page -->
+    <div class="time-selection-content">
+      <div class="time-selection-title">Select Your Practice Time Range</div>
+      <div class="time-inputs">
+        <div class="time-input">
+          <label for="startTime">Start Time (seconds)</label>
+          <input type="number" id="startTime" placeholder="e.g., 0" min="0">
+        </div>
+        <div class="time-input">
+          <label for="endTime">End Time (seconds)</label>
+          <input type="number" id="endTime" placeholder="e.g., 60" min="1">
+        </div>
+      </div>
+      <div class="time-buttons">
+        <button class="time-btn cancel-time-btn" onclick="goBack()">Cancel</button>
+        <button class="time-btn confirm-time-btn" onclick="confirmTimeRange()">Start Recording</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Main Camera UI - Shown after time selection --><div class="container" id="cameraContainer" style="display: none;">
-    <div class="fullscreen-container" id="fullscreenContainer">
-      <div class="top-bar">
-        <div class="title">Dance Recording</div>
-        <div class="settings" onclick="goBack()"><i class="fas fa-times"></i></div>
-      </div>
+  <!-- Main Camera UI - Shown after time selection --><div class="container" id="cameraContainer" style="display: none;">      <div class="fullscreen-container" id="fullscreenContainer">
+        <div class="top-bar">
+          <div class="title" id="pageTitle">Dance Recording</div>
+          <div class="settings" onclick="goBack()"><i class="fas fa-times"></i></div>
+        </div>
       <div class="camera-container">
         <video id="videoElement" autoplay playsinline></video>
         <canvas id="poseCanvas"></canvas>
-        
-        <div class="video-overlay">
-          <div class="timer-display" id="timerDisplay">3</div>
+          <div class="video-overlay">
+          <div class="timer-display" id="timerDisplay" style="display: none;"></div>
         </div>
         
         <div class="controls">
@@ -683,20 +749,18 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Timer Modal -->
-  <div class="modal" id="timerModal">
+  </div>  <!-- Timer Modal (Hidden by default) -->
+  <div class="modal" id="timerModal" style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title">Set Timer</div>
+        <div class="modal-title">Set Countdown Timer (Optional)</div>
         <div class="close-modal" onclick="closeTimerModal()">&times;</div>
       </div>
       <div class="timer-options">
-        <div class="timer-option" onclick="setTimer(3)">3 seconds</div>
-        <div class="timer-option" onclick="setTimer(5)">5 seconds</div>
-        <div class="timer-option" onclick="setTimer(10)">10 seconds</div>
-        <div class="timer-option" onclick="closeTimerModal()">No Timer</div>
+        <div class="timer-option" onclick="setTimer(3); closeTimerModal()">3 seconds</div>
+        <div class="timer-option" onclick="setTimer(5); closeTimerModal()">5 seconds</div>
+        <div class="timer-option" onclick="setTimer(10); closeTimerModal()">10 seconds</div>
+        <div class="timer-option" onclick="setTimer(0); closeTimerModal()">No Timer (Default)</div>
       </div>
     </div>
   </div>
@@ -752,22 +816,21 @@
       </div>
       
       <div class="recommendations-section">
-        <div class="recommendations-title">Recommended for You</div>
-        <div class="recommendations-grid">
+        <div class="recommendations-title">Recommended for You</div>        <div class="recommendations-grid">
           <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Dynamite'">
-            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <img src="/images/bts-dynamite.jpg" alt="BTS Dynamite" class="recommendation-img">
             <div class="recommendation-title">Dynamite - BTS</div>
           </div>
           <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Bad'">
-            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <img src="/images/michael-jackson.jpg" alt="Michael Jackson Bad" class="recommendation-img">
             <div class="recommendation-title">Bad - Michael Jackson</div>
           </div>
           <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Savage'">
-            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <img src="/images/megan-savage.jpg" alt="Megan Thee Stallion Savage" class="recommendation-img">
             <div class="recommendation-title">Savage - Megan Thee Stallion</div>
           </div>
           <div class="recommendation-item" onclick="window.location.href = '/choreographies?songTitle=Level Up'">
-            <img src="/images/michael-jackson.jpg" alt="Dance Style" class="recommendation-img">
+            <img src="/images/ciara-level-up.jpg" alt="Ciara Level Up" class="recommendation-img">
             <div class="recommendation-title">Level Up - Ciara</div>
           </div>
         </div>
@@ -798,57 +861,142 @@
     let isRecording = false;
     let countdownTimer;
     let poseDetection = false;
-    let poseNet;
-    let timerInterval;
+    let poseNet;    let timerInterval;
     let facingMode = "user"; // front camera by default
     let timeRange = { startTime: 0, endTime: 60 };
+    
     // Timer configuration
-const defaultTimerDuration = 5;
-let timerDuration = defaultTimerDuration; // Timer duration in seconds      // Initialize the camera when page loads
-      document.addEventListener('DOMContentLoaded', function() {
+    const defaultTimerDuration = 0; // No countdown timer by default - users can set one if they want
+    let timerDuration = defaultTimerDuration; // Timer duration in seconds
+    
+    // Battle mode variables
+    let isBattleMode = false;
+    let battleId = null;    let battleMode = null;
+
+    // Initialize the camera when page loads
+    document.addEventListener('DOMContentLoaded', function() {
       // Get the time range from the URL query parameter
       const urlParams = new URLSearchParams(window.location.search);
       const videoId = urlParams.get('videoId');
       const rangeParams = urlParams.get('range'); // Renamed to avoid conflict
-
-      // 1. Set initial visibility: Show time selection, hide camera.
-      document.getElementById('timeSelectionSection').style.display = 'flex';
-      document.getElementById('cameraContainer').style.display = 'none';
-
-      // 2. Clear time input fields to ensure a fresh start for the user.
-      document.getElementById('startTime').value = '';
-      document.getElementById('endTime').value = '';
       
-      // 3. Handle URL parameters for context (e.g., videoId for title, default internal timeRange)
-      // This does NOT pre-fill the user-facing input fields for time selection.
-      if (videoId) {
-        const timeSelectionTitle = document.querySelector('.time-selection-title');
-        if (timeSelectionTitle) {
-            timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + videoId + '</small>';
+      // Check for battle mode parameters
+      battleMode = urlParams.get('mode');
+      battleId = urlParams.get('battleId');
+      isBattleMode = battleMode === 'battle';
+      
+      console.log('Battle mode detected:', isBattleMode, 'Battle ID:', battleId);
+      
+      // Update page title based on mode
+      if (isBattleMode) {
+        document.getElementById('pageTitle').innerHTML = '<i class="fas fa-trophy"></i> Battle Mode';
+        document.title = 'Dance Battle Recording';
+      }      // Check if time range is already provided via URL parameters OR localStorage
+      let skipTimeSelection = false;
+      
+      // First check localStorage for data from choreography selection
+      const savedChoreography = localStorage.getItem('selectedTimeRange');
+      if (savedChoreography) {
+        try {
+          const choreography = JSON.parse(savedChoreography);          console.log('Found choreography data in localStorage:', choreography);
+          
+          // Validate the data before using it
+          if (choreography.startTime !== undefined && choreography.endTime !== undefined) {
+            // Use localStorage data to skip time selection
+            skipTimeSelection = true;
+            timeRange.startTime = choreography.startTime;
+            timeRange.endTime = choreography.endTime;
+            timeRange.videoId = choreography.videoId || '';
+            
+            console.log('Using localStorage data - skipping time selection:', timeRange);
+            
+            // Clear the localStorage since we're using it
+            localStorage.removeItem('selectedTimeRange');
+          } else {
+            console.warn('localStorage data is incomplete, will show time selection');
+          }
+        } catch (e) {
+          console.error('Error parsing choreography data from localStorage', e);
         }
-        timeRange.videoId = videoId; // Store videoId in the global timeRange object
-      } else {
-        const timeSelectionTitle = document.querySelector('.time-selection-title');
-        if (timeSelectionTitle) {
-            // Default title if no videoId from URL
-            timeSelectionTitle.innerHTML = 'Select Your Practice Time Range';
-        }
-        timeRange.videoId = ''; // Default
       }
-
-      if (rangeParams) { // If range is provided in URL
+      
+      // Then check URL parameters (this can override localStorage if both exist)
+      if (videoId && rangeParams) {
         const [startFromUrl, endFromUrl] = rangeParams.split('-').map(Number);
-        timeRange.startTime = startFromUrl;
-        timeRange.endTime = endFromUrl;
-      } else {
-        // Default internal values if no range in URL
-        timeRange.startTime = 0; 
-        timeRange.endTime = 60; 
+        if (!isNaN(startFromUrl) && !isNaN(endFromUrl) && startFromUrl < endFromUrl) {
+          // Time range is valid, skip time selection and go directly to camera
+          skipTimeSelection = true;
+          timeRange.startTime = startFromUrl;
+          timeRange.endTime = endFromUrl;
+          timeRange.videoId = videoId;
+        }
       }
       
+      // For battle mode, also skip time selection with defaults if no range provided
+      if (isBattleMode && !skipTimeSelection) {
+        skipTimeSelection = true;
+        timeRange.startTime = 0;
+        timeRange.endTime = 60; // Default 60 seconds for battles
+        timeRange.videoId = videoId || '';
+      }      if (skipTimeSelection) {
+        // 1. Skip time selection and go directly to camera
+        console.log('Skipping time selection - going directly to camera');
+        document.getElementById('timeSelectionSection').style.display = 'none';
+        document.getElementById('cameraContainer').style.display = 'flex';
+        
+        // Initialize camera immediately
+        initCamera().catch(error => {
+          console.error('Failed to initialize camera:', error);
+          alert('Error accessing camera: ' + error.message + '\n\nPlease check that:\n• You have granted camera permissions\n• Your camera is not being used by another app\n• Your device has a working camera');
+          // If camera fails, go back to previous page
+          window.history.back();
+        });
+      } else {
+        // 1. Set initial visibility: Show time selection, hide camera.
+        console.log('Showing time selection screen');
+        document.getElementById('timeSelectionSection').style.display = 'flex';
+        document.getElementById('cameraContainer').style.display = 'none';
+      }// 2. Clear time input fields and handle different scenarios
+      const startTimeInput = document.getElementById('startTime');
+      const endTimeInput = document.getElementById('endTime');
+        if (!skipTimeSelection) {
+        // Only clear and handle inputs if we're showing time selection
+        if (startTimeInput) startTimeInput.value = '';
+        if (endTimeInput) endTimeInput.value = '';
+        
+        // 3. Handle URL parameters for context (e.g., videoId for title)
+        if (videoId) {
+          const timeSelectionTitle = document.querySelector('.time-selection-title');
+          if (timeSelectionTitle) {
+              timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + videoId + '</small>';
+          }
+          // Only set videoId in timeRange if not already set
+          if (!timeRange.videoId) {
+            timeRange.videoId = videoId;
+          }
+        } else {
+          const timeSelectionTitle = document.querySelector('.time-selection-title');
+          if (timeSelectionTitle) {
+              // Default title if no videoId from URL
+              timeSelectionTitle.innerHTML = 'Select Your Practice Time Range';
+          }
+          // Only set defaults if not already set
+          if (!timeRange.videoId) {
+            timeRange.videoId = '';
+          }
+        }
+
+        // Set default time range values only if not already set by skipTimeSelection logic
+        if (timeRange.startTime === undefined) {
+          timeRange.startTime = 0; 
+        }
+        if (timeRange.endTime === undefined) {
+          timeRange.endTime = 60; 
+        }
+      }
       const loadingOverlay = document.getElementById('loadingOverlay');
       
-      // Auto-hide loading after 8 seconds as a fallback (from original code line 643)
+      // Auto-hide loading after 8 seconds as a fallback
       const loadingTimeoutFallback = setTimeout(() => {
         if (loadingOverlay && loadingOverlay.style.display !== 'none') {
           loadingOverlay.style.opacity = '0';
@@ -863,45 +1011,18 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
         loadingOverlay.style.opacity = '0';
         setTimeout(() => {
           loadingOverlay.style.display = 'none';
-        }, 500);
-        clearTimeout(loadingTimeoutFallback); // Clear the longer fallback
+        }, 500);        clearTimeout(loadingTimeoutFallback); // Clear the longer fallback
       }
-      
-      // 5. initCamera() is NOT called here. It's called by confirmTimeRange();
-        
-        // Also get choreography details if available (e.g. for title, but not for pre-filling inputs)
-        const savedChoreography = localStorage.getItem('selectedTimeRange');
-        if (savedChoreography) {
-          try {
-            const choreography = JSON.parse(savedChoreography);
-            console.log('Selected choreography from localStorage:', choreography);
-            
-            // Update title from localStorage if no videoId from URL and title is still default
-            // This part is optional and depends on desired behavior for the title.
-            // For now, URL videoId takes precedence for the title.
-            // if (!videoId && timeSelectionTitle && choreography.videoId) {
-            //   timeSelectionTitle.innerHTML = 'Select Time Range for Your Dance<br><small style="font-size: 0.8em; opacity: 0.8;">YouTube Video ID: ' + choreography.videoId + '</small>';
-            // }
-            
-            // Ensure inputs are NOT auto-filled from localStorage here, as they are cleared above.
-            // The following lines that were previously here are intentionally omitted/commented:
-            // if (choreography.startTime && choreography.endTime) {
-            //   document.getElementById('startTime').value = choreography.startTime;
-            //   document.getElementById('endTime').value = choreography.endTime;
-            // }
-          } catch (e) {
-            console.error('Error parsing choreography data from localStorage', e);
-          }
-        }
-      // }); // This was an extra closing bracket in the thought process, removed.
     });
-    
+
     // Function to start the camera after time selection
-    function confirmTimeRange() {
+    async function confirmTimeRange() {
+      console.log('confirmTimeRange called - hiding time selection and showing camera');
       try {
         const startTime = document.getElementById('startTime').value;
         const endTime = document.getElementById('endTime').value;
-          if (!startTime || !endTime) {
+        
+        if (!startTime || !endTime) {
           alert('Please enter both start and end times for your dance practice. This will help sync the music properly.');
           return;
         }
@@ -924,36 +1045,66 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
           return;
         }
         
-        timeRange.startTime = parseInt(startTime);
-        timeRange.endTime = parseInt(endTime);
+        // Store the time range
+        timeRange.startTime = startVal;
+        timeRange.endTime = endVal;
         
         // Hide time selection screen and show camera
         document.getElementById('timeSelectionSection').style.display = 'none';
         document.getElementById('cameraContainer').style.display = 'flex';
         
-        // Start the camera
-        initCamera();
+        // Initialize the camera with proper error handling
+        try {
+          await initCamera();
+          console.log('Camera initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize camera:', error);
+          alert('Error accessing camera: ' + error.message + '\n\nPlease check that:\n• You have granted camera permissions\n• Your camera is not being used by another app\n• Your device has a working camera\n\nYou will be returned to the time selection screen.');
+          
+          // Revert UI changes if camera initialization fails
+          document.getElementById('timeSelectionSection').style.display = 'flex';
+          document.getElementById('cameraContainer').style.display = 'none';
+          return;        }
+        
       } catch (error) {
         console.error('Error in confirmTimeRange:', error);
+        alert('An unexpected error occurred. Please try again.');
+        // Ensure UI is in a consistent state
+        document.getElementById('timeSelectionSection').style.display = 'flex';
+        document.getElementById('cameraContainer').style.display = 'none';
       }
     }
-      // Function to initialize the camera - returning a promise for better flow control
+
+    // Function to initialize the camera - returning a promise for better flow control
     async function initCamera() {
       return new Promise(async (resolve, reject) => {
         try {
           const constraints = {
-            audio: true,
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              volume: 0.0 // Mute the microphone feedback to prevent echo
+            },
             video: {
               facingMode: facingMode,
             }
           };
-          
-          stream = await navigator.mediaDevices.getUserMedia(constraints);
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
           const videoElement = document.getElementById('videoElement');
           videoElement.srcObject = stream;
           
-          // Disable mirroring by applying CSS transform to show normal camera view
-          videoElement.style.transform = "scaleX(1)";
+          // Mute the video element to prevent audio feedback/echo
+          videoElement.muted = true;
+          
+          // Apply proper mirroring for front camera to match user expectations
+          if (facingMode === "user") {
+            // Mirror the front camera so left appears left and right appears right
+            videoElement.style.transform = "scaleX(-1)";
+          } else {
+            // Don't mirror the back camera
+            videoElement.style.transform = "scaleX(1)";
+          }
           
           // Add video loaded event to ensure video is ready
           videoElement.onloadedmetadata = async () => {
@@ -1049,10 +1200,9 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
         canvas.height = video.clientHeight;
         
         async function detect() {
-          try {
-            if (!poseDetection) return;
+          try {            if (!poseDetection) return;
               const pose = await poseNet.estimateSinglePose(video, {
-              flipHorizontal: false // don't flip since we're not mirroring
+              flipHorizontal: facingMode === "user" // Flip pose detection for front camera to match the mirrored video
             });
             
             // Clear canvas
@@ -1144,28 +1294,54 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
             const countdownInterval = setInterval(() => {
               try {
                 countdown--;
-                timerDisplay.textContent = countdown;
-
-                if (countdown <= 0) {
+                timerDisplay.textContent = countdown;                if (countdown <= 0) {
                   clearInterval(countdownInterval);
-                  timerDisplay.style.display = 'none';                  startRecording();
+                  timerDisplay.style.display = 'none';
+                  
+                  // Start recording
+                  startRecording();
                   recordBtn.classList.add('recording');
-                  document.getElementById('recordIcon').classList.replace('fa-circle', 'fa-square');
+                  const recordIcon = document.getElementById('recordIcon');
+                  if (recordIcon) {
+                    recordIcon.classList.replace('fa-circle', 'fa-square');
+                  }
+                  
+                  // Show recording indicator
+                  timerDisplay.textContent = 'REC';
+                  timerDisplay.style.display = 'block';
+                  timerDisplay.style.background = 'rgba(255, 59, 92, 0.9)';
+                  timerDisplay.style.color = '#fff';
                 }
               } catch (error) {
                 console.error('Error during countdown:', error);
                 clearInterval(countdownInterval);
               }
-            }, 1000);
-          } else {
+            }, 1000);          } else {
             startRecording();
             recordBtn.classList.add('recording');
-            document.getElementById('recordIcon').classList.replace('fa-circle', 'fa-square');
-          }
-        } else {
+            const recordIcon = document.getElementById('recordIcon');
+            if (recordIcon) {
+              recordIcon.classList.replace('fa-circle', 'fa-square');
+            }
+            
+            // Show recording indicator
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.textContent = 'REC';
+            timerDisplay.style.display = 'block';
+            timerDisplay.style.background = 'rgba(255, 59, 92, 0.9)';
+            timerDisplay.style.color = '#fff';
+          }        } else {
           stopRecording();
           recordBtn.classList.remove('recording');
-          document.getElementById('recordIcon').classList.replace('fa-square', 'fa-circle');
+          const recordIcon = document.getElementById('recordIcon');
+          if (recordIcon) {
+            recordIcon.classList.replace('fa-square', 'fa-circle');
+          }
+          
+          // Hide recording indicator
+          const timerDisplay = document.getElementById('timerDisplay');
+          timerDisplay.style.display = 'none';
+          timerDisplay.style.background = 'rgba(0, 0, 0, 0.8)';
         }
       } catch (error) {
         console.error('Error in toggleRecording:', error);
@@ -1206,24 +1382,212 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
           } catch (error) {
             console.error('Error in recorder.onstop:', error);
           }
-        };
-        recorder.start();
+        };        recorder.start();
         isRecording = true;
         
-        // Improved audio playback method - YouTube URLs can't be used directly with Audio()
-        if (timeRange.videoId) {
-          // Create a hidden iframe for better audio playback
+        // Calculate recording duration based on time range
+        const recordingDuration = (timeRange.endTime - timeRange.startTime) * 1000; // Convert to milliseconds
+        console.log(`Recording will auto-stop after ${recordingDuration/1000} seconds`);
+        
+        // Set auto-stop timer for recording
+        const autoStopTimer = setTimeout(() => {
+          if (isRecording) {
+            console.log('Auto-stopping recording due to time range completion');
+            // Trigger stop recording
+            const recordBtn = document.getElementById('recordBtn');
+            recordBtn.classList.remove('recording');
+            const recordIcon = document.getElementById('recordIcon');
+            if (recordIcon) {
+              recordIcon.classList.replace('fa-square', 'fa-circle');
+            }
+            
+            // Hide recording indicator
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.style.display = 'none';
+            timerDisplay.style.background = 'rgba(0, 0, 0, 0.8)';
+            
+            // Stop recording
+            stopRecording();
+            
+            // Show auto-stop notification
+            const autoStopNotification = document.createElement('div');
+            autoStopNotification.style.position = 'fixed';
+            autoStopNotification.style.top = '80px';
+            autoStopNotification.style.left = '50%';
+            autoStopNotification.style.transform = 'translateX(-50%)';
+            autoStopNotification.style.background = 'rgba(34, 197, 94, 0.9)';
+            autoStopNotification.style.color = '#fff';
+            autoStopNotification.style.padding = '12px 24px';
+            autoStopNotification.style.borderRadius = '25px';
+            autoStopNotification.style.fontSize = '16px';
+            autoStopNotification.style.fontWeight = 'bold';
+            autoStopNotification.style.zIndex = '10000';
+            autoStopNotification.innerHTML = '⏰ Time Range Complete - Recording Stopped!';
+            document.body.appendChild(autoStopNotification);
+            
+            setTimeout(() => {
+              if (document.body.contains(autoStopNotification)) {
+                document.body.removeChild(autoStopNotification);
+              }
+            }, 4000);
+          }
+        }, recordingDuration);
+        
+        // Store the timer so we can clear it if manually stopped
+        window.autoStopTimer = autoStopTimer;
+          // Start playing the song from the selected time range
+        if (timeRange.videoId && timeRange.startTime !== undefined && timeRange.endTime !== undefined) {
+          console.log(`Starting audio playback: Video ID ${timeRange.videoId}, from ${timeRange.startTime}s to ${timeRange.endTime}s`);
+          
+          // Create a visible iframe for YouTube audio playback that users can hear
           const audioFrame = document.createElement('iframe');
           audioFrame.id = 'audioFrame';
-          audioFrame.style.display = 'none';
-          audioFrame.allow = 'autoplay';
-          audioFrame.src = `https://www.youtube.com/embed/${timeRange.videoId}?start=${timeRange.startTime}&end=${timeRange.endTime}&autoplay=1`;
+          audioFrame.style.position = 'fixed';
+          audioFrame.style.top = '10px';
+          audioFrame.style.right = '10px';
+          audioFrame.style.width = '300px';
+          audioFrame.style.height = '169px';
+          audioFrame.style.zIndex = '9998';
+          audioFrame.style.borderRadius = '8px';
+          audioFrame.style.border = '2px solid #ff3b5c';
+          audioFrame.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+          audioFrame.allow = 'autoplay; encrypted-media; accelerometer; gyroscope; picture-in-picture';
+          audioFrame.frameBorder = '0';
+          audioFrame.allowFullscreen = true;
+          
+          // Enhanced YouTube embed URL for audio playback with user interaction
+          const embedUrl = `https://www.youtube.com/embed/${timeRange.videoId}?` +
+            `start=${timeRange.startTime}&` +
+            `end=${timeRange.endTime}&` +
+            `autoplay=1&` +
+            `mute=0&` +
+            `controls=1&` +
+            `modestbranding=1&` +
+            `rel=0&` +
+            `showinfo=0&` +
+            `iv_load_policy=3&` +
+            `enablejsapi=1&` +
+            `loop=1&` +
+            `playlist=${timeRange.videoId}`;
+          
+          audioFrame.src = embedUrl;
           document.body.appendChild(audioFrame);
+          
+          // Add a minimize/hide button to the audio frame
+          const minimizeBtn = document.createElement('button');
+          minimizeBtn.innerHTML = '−';
+          minimizeBtn.style.position = 'absolute';
+          minimizeBtn.style.top = '5px';
+          minimizeBtn.style.right = '5px';
+          minimizeBtn.style.width = '25px';
+          minimizeBtn.style.height = '25px';
+          minimizeBtn.style.background = 'rgba(0,0,0,0.7)';
+          minimizeBtn.style.color = '#fff';
+          minimizeBtn.style.border = 'none';
+          minimizeBtn.style.borderRadius = '50%';
+          minimizeBtn.style.cursor = 'pointer';
+          minimizeBtn.style.fontSize = '16px';
+          minimizeBtn.style.zIndex = '9999';
+          minimizeBtn.onclick = function() {
+            if (audioFrame.style.height === '30px') {
+              // Restore
+              audioFrame.style.height = '169px';
+              audioFrame.style.width = '300px';
+              minimizeBtn.innerHTML = '−';
+            } else {
+              // Minimize
+              audioFrame.style.height = '30px';
+              audioFrame.style.width = '200px';
+              minimizeBtn.innerHTML = '+';
+            }
+          };
+          audioFrame.style.position = 'relative';
+          audioFrame.parentNode.insertBefore(minimizeBtn, audioFrame.nextSibling);
+          
+          // Show a notification that music is starting
+          const musicNotification = document.createElement('div');
+          musicNotification.style.position = 'fixed';
+          musicNotification.style.top = '80px';
+          musicNotification.style.left = '50%';
+          musicNotification.style.transform = 'translateX(-50%)';
+          musicNotification.style.background = 'rgba(34, 197, 94, 0.9)';
+          musicNotification.style.color = '#fff';
+          musicNotification.style.padding = '12px 24px';
+          musicNotification.style.borderRadius = '25px';
+          musicNotification.style.fontSize = '16px';
+          musicNotification.style.fontWeight = 'bold';
+          musicNotification.style.zIndex = '10000';
+          musicNotification.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+          musicNotification.innerHTML = '🎵 Music Started! Dance to the beat!';
+          document.body.appendChild(musicNotification);
+          
+          // Remove notification after 4 seconds
+          setTimeout(() => {
+            if (document.body.contains(musicNotification)) {
+              document.body.removeChild(musicNotification);
+            }
+          }, 4000);
+          
+          // Add click-to-play fallback for better browser compatibility
+          const playButton = document.createElement('button');
+          playButton.innerHTML = '🎵 Click to Start Music';
+          playButton.style.position = 'fixed';
+          playButton.style.top = '50%';
+          playButton.style.left = '50%';
+          playButton.style.transform = 'translate(-50%, -50%)';
+          playButton.style.background = '#ff3b5c';
+          playButton.style.color = '#fff';
+          playButton.style.border = 'none';
+          playButton.style.padding = '15px 30px';
+          playButton.style.borderRadius = '30px';
+          playButton.style.fontSize = '18px';
+          playButton.style.fontWeight = 'bold';
+          playButton.style.cursor = 'pointer';
+          playButton.style.zIndex = '10001';
+          playButton.style.boxShadow = '0 4px 16px rgba(255, 59, 92, 0.4)';
+          
+          playButton.onclick = function() {
+            // Remove the play button and ensure audio starts
+            document.body.removeChild(playButton);
+            audioFrame.src = audioFrame.src; // Reload to trigger autoplay
+          };
+          
+          document.body.appendChild(playButton);
+          
+          // Auto-remove play button if music starts automatically
+          setTimeout(() => {
+            if (document.body.contains(playButton)) {
+              document.body.removeChild(playButton);
+            }
+          }, 3000);
+          
         } else {
-          console.log('No video ID available for audio playback');
+          console.log('No video ID or time range available for audio playback');
+          
+          // Show notification that no music is available
+          const noMusicNotification = document.createElement('div');
+          noMusicNotification.style.position = 'fixed';
+          noMusicNotification.style.top = '80px';
+          noMusicNotification.style.left = '50%';
+          noMusicNotification.style.transform = 'translateX(-50%)';
+          noMusicNotification.style.background = 'rgba(255, 165, 0, 0.9)';
+          noMusicNotification.style.color = '#fff';
+          noMusicNotification.style.padding = '12px 24px';
+          noMusicNotification.style.borderRadius = '25px';
+          noMusicNotification.style.fontSize = '16px';
+          noMusicNotification.style.fontWeight = 'bold';
+          noMusicNotification.style.zIndex = '10000';
+          noMusicNotification.innerHTML = '📹 Recording without music - Practice mode';
+          document.body.appendChild(noMusicNotification);
+          
+          setTimeout(() => {
+            if (document.body.contains(noMusicNotification)) {
+              document.body.removeChild(noMusicNotification);
+            }
+          }, 4000);
         }
 
-        console.log('Recording started.');      } catch (error) {
+        console.log('Recording started with time range:', timeRange);} catch (error) {
         console.error('Error in startRecording:', error);
         
         // Enhanced error feedback for recording issues
@@ -1237,20 +1601,54 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
           alert('Failed to start recording: ' + error.message + '. Please refresh the page and try again.');
         }
       }
-    }
-
-    // Function to stop recording    function stopRecording() {
+    }    // Function to stop recording
+    function stopRecording() {
       try {
-        if (!recorder || recorder.state === 'inactive') return;
-
-        recorder.stop();
+        if (!recorder || recorder.state === 'inactive') {
+          return;
+        }
+          recorder.stop();
         isRecording = false;
         
-        // Remove the audio iframe if it exists
+        // Clear the auto-stop timer if it's running to prevent duplicate stop calls
+        if (window.autoStopTimer) {
+          clearTimeout(window.autoStopTimer);
+          window.autoStopTimer = null;
+        }
+        
+        // Remove the audio iframe and its controls if they exist
         const audioFrame = document.getElementById('audioFrame');
         if (audioFrame) {
           document.body.removeChild(audioFrame);
         }
+        
+        // Remove minimize button if it exists
+        const minimizeBtn = document.querySelector('button[style*="position: absolute"]');
+        if (minimizeBtn) {
+          document.body.removeChild(minimizeBtn);
+        }
+        
+        // Show music stopped notification
+        const musicStoppedNotification = document.createElement('div');
+        musicStoppedNotification.style.position = 'fixed';
+        musicStoppedNotification.style.top = '80px';
+        musicStoppedNotification.style.left = '50%';
+        musicStoppedNotification.style.transform = 'translateX(-50%)';
+        musicStoppedNotification.style.background = 'rgba(239, 68, 68, 0.9)';
+        musicStoppedNotification.style.color = '#fff';
+        musicStoppedNotification.style.padding = '12px 24px';
+        musicStoppedNotification.style.borderRadius = '25px';
+        musicStoppedNotification.style.fontSize = '16px';
+        musicStoppedNotification.style.fontWeight = 'bold';
+        musicStoppedNotification.style.zIndex = '10000';
+        musicStoppedNotification.innerHTML = '🛑 Recording & Music Stopped';
+        document.body.appendChild(musicStoppedNotification);
+        
+        setTimeout(() => {
+          if (document.body.contains(musicStoppedNotification)) {
+            document.body.removeChild(musicStoppedNotification);
+          }
+        }, 3000);
         
         // After stopping recording, show analysis option
         setTimeout(() => {
@@ -1262,82 +1660,515 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
       } catch (error) {
         console.error('Error in stopRecording:', error);
       }
-    
-    // Function to analyze dance performance and show results
+    }
+      // Function to analyze dance performance and show results
     function analyzeDancePerformance() {
       // In a real app, this would send the recording to a server for AI analysis
-      // For now, we'll simulate the analysis with a timeout
+      // For now, we'll simulate realistic analysis based on recording duration and time range
       
       console.log("Analyzing dance performance...");
       
-      // Create loading overlay
+      const danceLength = timeRange.endTime - timeRange.startTime;
+      const currentTime = Date.now();
+      
+      // Create loading overlay with more detailed analysis steps
       const loadingOverlay = document.createElement('div');
       loadingOverlay.style.position = 'fixed';
       loadingOverlay.style.top = '0';
       loadingOverlay.style.left = '0';
       loadingOverlay.style.width = '100%';
       loadingOverlay.style.height = '100%';
-      loadingOverlay.style.background = 'rgba(0, 0, 0, 0.8)';
+      loadingOverlay.style.background = 'rgba(0, 0, 0, 0.9)';
       loadingOverlay.style.display = 'flex';
       loadingOverlay.style.flexDirection = 'column';
       loadingOverlay.style.justifyContent = 'center';
       loadingOverlay.style.alignItems = 'center';
       loadingOverlay.style.zIndex = '3000';
       
+      const loadingTitle = document.createElement('div');
+      loadingTitle.textContent = '🤖 AI Dance Analysis in Progress';
+      loadingTitle.style.color = '#ff3b5c';
+      loadingTitle.style.fontSize = '2rem';
+      loadingTitle.style.fontWeight = 'bold';
+      loadingTitle.style.marginBottom = '30px';
+      loadingTitle.style.textAlign = 'center';
+      
       const loadingText = document.createElement('div');
-      loadingText.textContent = 'Analyzing your dance moves...';
+      loadingText.textContent = 'Initializing analysis...';
       loadingText.style.color = '#fff';
-      loadingText.style.fontSize = '1.5rem';
+      loadingText.style.fontSize = '1.3rem';
       loadingText.style.marginBottom = '20px';
+      loadingText.style.textAlign = 'center';
       
       const progressContainer = document.createElement('div');
       progressContainer.style.width = '80%';
-      progressContainer.style.maxWidth = '300px';
-      progressContainer.style.height = '10px';
+      progressContainer.style.maxWidth = '400px';
+      progressContainer.style.height = '12px';
       progressContainer.style.background = '#333';
-      progressContainer.style.borderRadius = '5px';
+      progressContainer.style.borderRadius = '6px';
       progressContainer.style.overflow = 'hidden';
+      progressContainer.style.marginBottom = '20px';
       
       const progressBar = document.createElement('div');
       progressBar.style.width = '0%';
       progressBar.style.height = '100%';
       progressBar.style.background = 'linear-gradient(45deg, #ff3b5c, #ff713e)';
-      progressBar.style.transition = 'width 2s linear';
+      progressBar.style.transition = 'width 0.5s ease';
+      
+      const progressText = document.createElement('div');
+      progressText.textContent = '0%';
+      progressText.style.color = '#ccc';
+      progressText.style.fontSize = '1rem';
+      progressText.style.textAlign = 'center';
       
       progressContainer.appendChild(progressBar);
+      loadingOverlay.appendChild(loadingTitle);
       loadingOverlay.appendChild(loadingText);
       loadingOverlay.appendChild(progressContainer);
+      loadingOverlay.appendChild(progressText);
       document.body.appendChild(loadingOverlay);
       
-      // Animate progress bar
-      setTimeout(() => {
-        progressBar.style.width = '100%';
-      }, 100);
-      
-      // Simulate AI analysis steps with detailed status updates
+      // More realistic AI analysis steps
       const analysisSteps = [
-        'Detecting key joint points...',
-        'Analyzing rhythm synchronization...',
-        'Evaluating movement precision...',
-        'Calculating energy level...',
-        'Assessing technique...',
-        'Generating recommendations...'
+        { text: 'Processing video frames...', duration: 1000 },
+        { text: 'Detecting body pose and movement...', duration: 1500 },
+        { text: 'Analyzing rhythm synchronization...', duration: 1200 },
+        { text: 'Evaluating movement precision...', duration: 1300 },
+        { text: 'Calculating energy and flow...', duration: 1000 },
+        { text: 'Assessing dance technique...', duration: 1400 },
+        { text: 'Comparing to professional dancers...', duration: 1100 },
+        { text: 'Generating personalized feedback...', duration: 800 }
       ];
       
       let stepIndex = 0;
-      const stepInterval = setInterval(() => {
+      let totalProgress = 0;
+      
+      function runAnalysisStep() {
         if (stepIndex < analysisSteps.length) {
-          loadingText.textContent = analysisSteps[stepIndex];
-          stepIndex++;
+          const step = analysisSteps[stepIndex];
+          loadingText.textContent = step.text;
+          
+          const stepProgress = (stepIndex + 1) / analysisSteps.length * 100;
+          progressBar.style.width = stepProgress + '%';
+          progressText.textContent = Math.round(stepProgress) + '%';
+          
+          setTimeout(() => {
+            stepIndex++;
+            runAnalysisStep();
+          }, step.duration);
         } else {
-          clearInterval(stepInterval);
-          // Show results after all steps are complete
+          // Analysis complete, generate results based on performance
           setTimeout(() => {
             document.body.removeChild(loadingOverlay);
-            showResults();
+            generateAndShowResults(danceLength);
           }, 500);
         }
-      }, 300);
+      }
+      
+      // Start analysis
+      setTimeout(runAnalysisStep, 500);
+    }
+      // Function to generate realistic results based on dance performance
+    function generateAndShowResults(danceLength) {
+      if (isBattleMode) {
+        generateBattleResults(danceLength);
+      } else {
+        generateStandardResults(danceLength);
+      }
+    }
+    
+    // Function to generate battle-specific results
+    function generateBattleResults(danceLength) {
+      // Generate battle performance scores
+      const battleScores = {
+        rhythm: 6.0 + Math.random() * 4.0, // 6.0-10
+        movement: 5.5 + Math.random() * 4.5, // 5.5-10  
+        energy: 7.0 + Math.random() * 3.0, // 7.0-10
+        technique: 6.0 + Math.random() * 4.0, // 6.0-10
+        stage_presence: 6.5 + Math.random() * 3.5, // 6.5-10
+        originality: 5.0 + Math.random() * 5.0 // 5.0-10
+      };
+      
+      // Adjust scores based on dance length
+      if (danceLength > 45) {
+        Object.keys(battleScores).forEach(key => battleScores[key] += 0.3);
+      }
+      
+      // Cap scores at 10
+      Object.keys(battleScores).forEach(key => {
+        battleScores[key] = Math.min(battleScores[key], 10);
+      });
+      
+      const overallScore = (battleScores.rhythm + battleScores.movement + battleScores.energy + 
+                           battleScores.technique + battleScores.stage_presence + battleScores.originality) / 6;
+      
+      // Determine battle result (win/lose based on score)
+      const battleResult = overallScore >= 7.5 ? 'victory' : overallScore >= 6.5 ? 'close' : 'defeat';
+      
+      // Update the results display with battle-specific content
+      updateBattleResultsDisplay(battleScores, overallScore, battleResult);
+      
+      // Show results screen
+      document.getElementById('resultsScreen').style.display = 'flex';
+    }
+      // Function to generate standard (non-battle) results
+    function generateStandardResults(danceLength) {
+      // Create more realistic and varied scoring system
+      const performanceFactors = analyzePerformanceFactors(danceLength);
+      
+      // Generate honest scores with wider range (2.0-10.0)
+      const baseScores = {
+        rhythm: generateHonestScore(performanceFactors.rhythmBase, performanceFactors.consistency),
+        movement: generateHonestScore(performanceFactors.movementBase, performanceFactors.fluidity),
+        energy: generateHonestScore(performanceFactors.energyBase, performanceFactors.enthusiasm),
+        technique: generateHonestScore(performanceFactors.techniqueBase, performanceFactors.precision)
+      };
+      
+      // Apply performance modifiers
+      applyPerformanceModifiers(baseScores, danceLength, performanceFactors);
+        // Cap scores at 10 and floor at 2
+      Object.keys(baseScores).forEach(key => {
+        baseScores[key] = Math.max(2.0, Math.min(baseScores[key], 10.0));
+      });
+      
+      const standardOverallScore = (baseScores.rhythm + baseScores.movement + baseScores.energy + baseScores.technique) / 4;
+      
+      // Update the results display with generated scores
+      document.querySelector('.rating-row:nth-child(1) .rating-score').textContent = baseScores.rhythm.toFixed(1) + '/10';
+      document.querySelector('.rating-row:nth-child(2) .rating-score').textContent = baseScores.movement.toFixed(1) + '/10';
+      document.querySelector('.rating-row:nth-child(3) .rating-score').textContent = baseScores.energy.toFixed(1) + '/10';
+      document.querySelector('.rating-row:nth-child(4) .rating-score').textContent = baseScores.technique.toFixed(1) + '/10';
+        // Update star rating based on overall score
+      const stars = document.querySelectorAll('.star-rating i');
+      const starCount = Math.floor(standardOverallScore / 2); // Convert 10-point scale to 5-star
+      const hasHalfStar = (standardOverallScore / 2) % 1 >= 0.5;
+      
+      stars.forEach((star, index) => {
+        if (index < starCount) {
+          star.className = 'fas fa-star';
+        } else if (index === starCount && hasHalfStar) {
+          star.className = 'fas fa-star-half-alt';
+        } else {
+          star.className = 'far fa-star';
+        }
+      });
+      
+      // Generate personalized feedback
+      const feedbackMessages = generatePersonalizedFeedback(baseScores, danceLength);
+      document.querySelector('.feedback-content').innerHTML = feedbackMessages;
+        showResults();
+    }
+    
+    // Function to update battle results display
+    function updateBattleResultsDisplay(battleScores, overallScore, battleResult) {
+      // Update the title to battle results
+      document.querySelector('.results-title').innerHTML = '<i class="fas fa-trophy"></i> Battle Results';
+      
+      // Update rating section for battle
+      const ratingSection = document.querySelector('.rating-section');
+      ratingSection.innerHTML = `
+        <div class="rating-title">Battle Performance</div>
+        <div class="battle-result ${battleResult}">
+          ${battleResult === 'victory' ? '🏆 VICTORY!' : 
+            battleResult === 'close' ? '⚔️ CLOSE BATTLE!' : '💪 KEEP FIGHTING!'}
+        </div>
+        <div class="overall-score">${overallScore.toFixed(1)}/10</div>
+        <div class="rating-details">
+          <div class="rating-row">
+            <div class="rating-category">Rhythm</div>
+            <div class="rating-score">${battleScores.rhythm.toFixed(1)}/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Movement</div>
+            <div class="rating-score">${battleScores.movement.toFixed(1)}/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Energy</div>
+            <div class="rating-score">${battleScores.energy.toFixed(1)}/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Technique</div>
+            <div class="rating-score">${battleScores.technique.toFixed(1)}/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Stage Presence</div>
+            <div class="rating-score">${battleScores.stage_presence.toFixed(1)}/10</div>
+          </div>
+          <div class="rating-row">
+            <div class="rating-category">Originality</div>
+            <div class="rating-score">${battleScores.originality.toFixed(1)}/10</div>
+          </div>
+        </div>
+      `;
+      
+      // Generate battle-specific feedback
+      const battleFeedback = generateBattleFeedback(battleScores, overallScore, battleResult);
+      document.querySelector('.feedback-content').innerHTML = battleFeedback;
+      
+      // Update recommendations to show more battles
+      const recommendationsSection = document.querySelector('.recommendations-section');
+      recommendationsSection.innerHTML = `
+        <div class="recommendations-title">More Battles</div>
+        <div class="recommendations-grid">
+          <div class="recommendation-item" onclick="window.location.href = '/battles'">
+            <img src="/images/bts-dynamite.jpg" alt="More Battles" class="recommendation-img">
+            <div class="recommendation-title">Join Another Battle</div>
+          </div>
+          <div class="recommendation-item" onclick="window.location.href = '/battles'">
+            <img src="/images/michael-jackson.jpg" alt="Create Battle" class="recommendation-img">
+            <div class="recommendation-title">Create Your Battle</div>
+          </div>
+          <div class="recommendation-item" onclick="window.location.href = '/choreographies'">
+            <img src="/images/megan-savage.jpg" alt="Practice Mode" class="recommendation-img">
+            <div class="recommendation-title">Practice Mode</div>
+          </div>
+          <div class="recommendation-item" onclick="window.location.href = '/battles'">
+            <img src="/images/ciara-level-up.jpg" alt="Leaderboard" class="recommendation-img">
+            <div class="recommendation-title">View Leaderboard</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Function to generate battle-specific feedback
+    function generateBattleFeedback(scores, overallScore, battleResult) {
+      let feedback = '<p>';
+      
+      if (battleResult === 'victory') {
+        feedback += '🎉 Congratulations! You dominated this battle with exceptional skill and style. ';
+      } else if (battleResult === 'close') {
+        feedback += '⚡ What an intense battle! You put up a strong fight and showed great potential. ';
+      } else {
+        feedback += '💪 Every battle is a learning experience! You showed courage by competing. ';
+      }
+      
+      feedback += 'Here\'s how you can improve for your next battle:</p><ul>';
+      
+      // Specific feedback based on scores
+      if (scores.rhythm < 7) {
+        feedback += '<li>🎵 Work on staying perfectly in sync with the beat - timing is crucial in battles</li>';
+      }
+      if (scores.movement < 7) {
+        feedback += '<li>💃 Practice sharper, more defined movements to make a stronger impact</li>';
+      }
+      if (scores.energy < 7) {
+        feedback += '<li>⚡ Bring more intensity and passion - battle energy should be explosive!</li>';
+      }
+      if (scores.technique < 7) {
+        feedback += '<li>🎯 Focus on cleaner execution of your moves for better technical scores</li>';
+      }
+      if (scores.stage_presence < 7) {
+        feedback += '<li>👑 Command the stage with confidence - make eye contact and own your space</li>';
+      }
+      if (scores.originality < 7) {
+        feedback += '<li>✨ Add your own unique style and unexpected moves to stand out</li>';
+      }
+      
+      // Add at least one positive note
+      const strongestSkill = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+      feedback += `<li>🌟 Your ${strongestSkill.replace('_', ' ')} was your strongest asset - keep building on that!</li>`;
+      
+      feedback += '</ul>';
+      
+      // Battle-specific tips
+      feedback += '<p style="margin-top: 15px;"><strong>Battle Pro Tips:</strong></p>';
+      feedback += '<ul>';      feedback += '<li>🔥 Study your opponents\' styles before competing</li>';
+      feedback += '<li>⚔️ Practice freestyling to respond to unexpected moments</li>';
+      feedback += '<li>🎭 Develop your signature moves that judges will remember</li>';
+      feedback += '<li>🏆 Watch professional battle footage for inspiration</li>';
+      feedback += '</ul>';
+      
+      return feedback;
+    }
+    
+    // Advanced performance analysis functions for honest scoring
+    function analyzePerformanceFactors(danceLength) {
+      // Simulate different performance scenarios
+      const scenarios = [
+        { type: 'beginner', probability: 0.4 },
+        { type: 'intermediate', probability: 0.35 },
+        { type: 'advanced', probability: 0.20 },
+        { type: 'expert', probability: 0.05 }
+      ];
+      
+      // Random scenario selection based on probability
+      const random = Math.random();
+      let cumulative = 0;
+      let selectedScenario = 'beginner';
+      
+      for (const scenario of scenarios) {
+        cumulative += scenario.probability;
+        if (random <= cumulative) {
+          selectedScenario = scenario.type;
+          break;
+        }
+      }
+      
+      // Base scores for different skill levels
+      const skillBases = {
+        beginner: { rhythm: 3.5, movement: 3.0, energy: 4.0, technique: 2.5 },
+        intermediate: { rhythm: 6.0, movement: 6.5, energy: 7.0, technique: 5.5 },
+        advanced: { rhythm: 7.5, movement: 8.0, energy: 8.5, technique: 7.8 },
+        expert: { rhythm: 8.8, movement: 9.0, energy: 9.2, technique: 9.0 }
+      };
+      
+      const base = skillBases[selectedScenario];
+      
+      return {
+        skillLevel: selectedScenario,
+        rhythmBase: base.rhythm,
+        movementBase: base.movement,
+        energyBase: base.energy,
+        techniqueBase: base.technique,
+        consistency: Math.random() * 2 - 1, // -1 to 1
+        fluidity: Math.random() * 2 - 1,
+        enthusiasm: Math.random() * 2 - 1,
+        precision: Math.random() * 2 - 1
+      };
+    }
+    
+    function generateHonestScore(baseScore, modifier) {
+      // Add variance and modifier
+      const variance = (Math.random() - 0.5) * 2; // -1 to 1
+      const score = baseScore + modifier + variance;
+      return score;
+    }
+    
+    function applyPerformanceModifiers(scores, danceLength, factors) {
+      // Dance length affects different aspects differently
+      if (danceLength < 10) {
+        // Very short dances penalized for technique and rhythm
+        scores.technique -= 1.0;
+        scores.rhythm -= 0.5;
+      } else if (danceLength > 120) {
+        // Very long dances get stamina bonus but may lose precision
+        scores.energy += 0.8;
+        scores.technique -= 0.3;
+      } else if (danceLength > 60) {
+        // Good length dances get moderate bonus
+        Object.keys(scores).forEach(key => scores[key] += 0.3);
+      }
+      
+      // Apply skill-based modifiers
+      if (factors.skillLevel === 'beginner') {
+        // Beginners might have inconsistent performance
+        const inconsistency = Math.random() * 1.5;
+        Object.keys(scores).forEach(key => {
+          scores[key] += (Math.random() - 0.5) * inconsistency;
+        });
+      } else if (factors.skillLevel === 'expert') {
+        // Experts rarely have bad performances
+        Object.keys(scores).forEach(key => {
+          scores[key] = Math.max(scores[key], 7.5);
+        });
+      }
+    }
+      // Function to generate personalized feedback messages
+    function generatePersonalizedFeedback(scores, danceLength) {
+      let feedback = '<p>';
+      
+      // Overall performance assessment
+      const feedbackOverallScore = (scores.rhythm + scores.movement + scores.energy + scores.technique) / 4;
+      if (feedbackOverallScore >= 8.5) {
+        feedback += '🔥 Outstanding performance! Your dance skills are impressive. ';
+      } else if (feedbackOverallScore >= 7.5) {
+        feedback += '💫 Great job! You showed excellent dance ability. ';
+      } else if (feedbackOverallScore >= 6.5) {
+        feedback += '👍 Good performance! You have solid dance foundations. ';
+      } else {
+        feedback += '🌟 Nice effort! There\'s room for improvement, but you\'re on the right track. ';
+      }
+      
+      // Dance length feedback
+      if (danceLength > 90) {
+        feedback += 'Your stamina for that long sequence was commendable! ';
+      } else if (danceLength < 15) {
+        feedback += 'Try practicing with longer segments to build endurance. ';
+      }
+      
+      feedback += '</p><h4 style="color: #ff3b5c; margin: 20px 0 10px 0;">Specific Areas to Improve:</h4><ul>';
+        // Specific feedback based on scores - more honest and detailed
+      const improvements = [];
+      const criticalAreas = [];
+      
+      if (scores.rhythm < 5.0) {
+        criticalAreas.push('rhythm');
+        feedback += '<li><strong>Rhythm & Timing (Critical):</strong> Your timing needs significant work. Start with simple beats and use a metronome. Focus on feeling the music before adding complex moves.</li>';
+      } else if (scores.rhythm < 7.0) {
+        improvements.push('rhythm');
+        feedback += '<li><strong>Rhythm & Timing:</strong> Good foundation, but work on staying on beat throughout. Practice clapping to music before dancing.</li>';
+      }
+      
+      if (scores.movement < 5.0) {
+        criticalAreas.push('movement');
+        feedback += '<li><strong>Movement Quality (Critical):</strong> Focus on basic body control and coordination. Practice isolation exercises and basic steps slowly.</li>';
+      } else if (scores.movement < 7.0) {
+        improvements.push('movement');
+        feedback += '<li><strong>Movement Quality:</strong> Your movements show promise but need more fluidity. Practice transitions between moves.</li>';
+      }
+      
+      if (scores.energy < 5.0) {
+        criticalAreas.push('energy');
+        feedback += '<li><strong>Energy & Expression (Critical):</strong> Dance with more confidence! Let go of inhibitions and express yourself freely. Energy is contagious - feel the music!</li>';
+      } else if (scores.energy < 7.0) {
+        improvements.push('energy');
+        feedback += '<li><strong>Energy & Expression:</strong> Good energy levels, but push yourself to be more expressive and dynamic.</li>';
+      }
+      
+      if (scores.technique < 5.0) {
+        criticalAreas.push('technique');
+        feedback += '<li><strong>Technique (Critical):</strong> Focus on fundamentals - posture, body alignment, and clean execution. Consider taking basic dance classes.</li>';
+      } else if (scores.technique < 7.0) {
+        improvements.push('technique');
+        feedback += '<li><strong>Technique:</strong> Solid foundation, but refine your precision and control. Work on details and clean execution.</li>';      }
+      
+      // If performance was poor overall
+      const performanceScore = (scores.rhythm + scores.movement + scores.energy + scores.technique) / 4;
+      if (performanceScore < 4.0) {
+        feedback += '<li><strong>Overall Performance:</strong> Keep practicing! Everyone starts somewhere. Focus on basics and don\'t get discouraged.</li>';
+      } else if (performanceScore < 6.0) {
+        feedback += '<li><strong>Overall Performance:</strong> You\'re developing your skills. Consistent practice will lead to improvement.</li>';
+      }
+      
+      // Positive reinforcement - be more selective
+      const strengths = [];
+      if (scores.rhythm >= 8.0) strengths.push('excellent rhythm and timing');
+      if (scores.movement >= 8.0) strengths.push('smooth, controlled movement');
+      if (scores.energy >= 8.0) strengths.push('outstanding energy and expression');
+      if (scores.technique >= 8.0) strengths.push('impressive technical skill');
+      
+      if (strengths.length > 0) {
+        feedback += `<li><strong>Your Strengths:</strong> ${strengths.join(', ')}. These are real assets - keep building on them!</li>`;
+      } else if (performanceScore >= 6.0) {
+        // Find best scoring area for moderate performers
+        const bestArea = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        feedback += `<li><strong>Your Best Area:</strong> ${bestArea.charAt(0).toUpperCase() + bestArea.slice(1)} shows the most promise. Build confidence here first.</li>`;
+      }
+      
+      feedback += '</ul>';
+      
+      // Honest practice recommendations based on skill level
+      feedback += '<h4 style="color: #ff3b5c; margin: 20px 0 10px 0;">Honest Practice Plan:</h4>';
+      feedback += '<ul>';
+      
+      if (criticalAreas.length > 0) {
+        feedback += '<li><strong>Priority:</strong> Focus intensively on ' + criticalAreas.join(' and ') + ' before moving to advanced techniques</li>';
+        feedback += '<li>Practice basics for 20-30 minutes daily before attempting full choreographies</li>';
+        feedback += '<li>Consider beginner classes or online tutorials for fundamental skills</li>';
+      } else if (improvements.length > 0) {
+        feedback += '<li>Dedicate 15 minutes daily to improving ' + improvements.join(' and ') + '</li>';
+        feedback += '<li>Record yourself frequently to track progress objectively</li>';
+        feedback += '<li>Challenge yourself with slightly more complex choreographies</li>';
+      } else {
+        feedback += '<li>You\'re ready for advanced challenges and complex choreographies!</li>';
+        feedback += '<li>Focus on developing your unique style and signature moves</li>';
+        feedback += '<li>Consider teaching others or joining competitive dance groups</li>';
+      }
+      
+      feedback += '<li>Practice this specific routine until you can do it without thinking</li>';
+      feedback += '</ul>';
+      
+      return feedback;
     }
     
     // Function to show results
@@ -1365,15 +2196,18 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
         document.getElementById('timerModal').style.display = 'none';
       } catch (error) {
         console.error('Error in closeTimerModal:', error);
-      }
-    }
+      }    }
 
     // Function to set the timer duration
     function setTimer(seconds) {
       try {
         timerDuration = seconds;
         closeTimerModal();
-        alert(`Timer set to ${seconds} seconds.`);
+        if (seconds === 0) {
+          alert('Timer disabled. Recording will start immediately when you press the record button.');
+        } else {
+          alert(`Timer set to ${seconds} seconds.`);
+        }
       } catch (error) {
         console.error('Error in setTimer:', error);
       }
@@ -1390,15 +2224,25 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
       facingMode = facingMode === "user" ? "environment" : "user";
       
       // Reinitialize camera with new facing mode
-      initCamera();
-    }
-      // Function to go back to previous page
+      initCamera().then(() => {
+        console.log(`Switched to ${facingMode === "user" ? "front" : "back"} camera`);
+      }).catch(error => {
+        console.error('Error switching camera:', error);
+        // If switching fails, revert to previous mode
+        facingMode = facingMode === "user" ? "environment" : "user";
+        alert('Unable to switch camera. Make sure your device has both front and back cameras.');
+      });
+    }      // Function to go back to previous page
     function goBack() {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
       
-      window.history.back();
+      if (isBattleMode) {
+        window.location.href = '/battles';
+      } else {
+        window.history.back();
+      }
     }
     
     // Function to create a new battle
@@ -1506,10 +2350,11 @@ let timerDuration = defaultTimerDuration; // Timer duration in seconds      // I
       const icon = document.querySelector('.fa-expand, .fa-compress');
       if (document.fullscreenElement) {
         icon.classList.replace('fa-expand', 'fa-compress');
-      } else {
-        icon.classList.replace('fa-compress', 'fa-expand');
+      } else {        icon.classList.replace('fa-compress', 'fa-expand');
       }
-    });    // Add event listener for document loaded state
+    });
+    
+    // Add event listener for document loaded state
     window.addEventListener('load', () => {
       console.log('Page fully loaded. Camera initialization in progress...');
     });

@@ -6,10 +6,7 @@ router.get('/', (req, res) => {
   const videoId = req.query.videoId || '';
   const range = req.query.range || '0-60'; // Default is 0-60 seconds
   
-  if (!videoId) {
-    return res.redirect('/ratings');
-  }
-  
+  // Allow access even without videoId - time range might be in localStorage
   res.render('camera', { 
     title: 'Dance Recording Studio',
     videoId, 

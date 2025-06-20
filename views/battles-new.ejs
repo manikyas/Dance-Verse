@@ -382,93 +382,10 @@
       font-weight: bold;
       transition: all 0.3s ease;
     }
-      .create-battle-btn:hover {
+    
+    .create-battle-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(255, 59, 92, 0.4);
-    }
-
-    /* Spotify Search Styles */
-    .spotify-search-container {
-      margin-top: 15px;
-    }
-
-    .search-input-container {
-      position: relative;
-      margin-bottom: 15px;
-    }
-
-    .search-input-container input {
-      padding-right: 50px;
-    }
-
-    .spotify-icon {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #1db954;
-      font-size: 1.2rem;
-    }
-
-    .search-loading {
-      text-align: center;
-      padding: 20px;
-      color: #888;
-    }
-
-    .spotify-results {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .search-results-header {
-      padding: 10px 0;
-      font-size: 0.9rem;
-      color: #888;
-      border-bottom: 1px solid #333;
-      margin-bottom: 15px;
-    }
-
-    .song-option.spotify-track {
-      display: flex;
-      align-items: center;
-      text-align: left;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-
-    .song-option.spotify-track img {
-      width: 60px;
-      height: 60px;
-      margin-right: 15px;
-      margin-bottom: 0;
-      border-radius: 4px;
-    }
-
-    .song-info {
-      flex: 1;
-    }
-
-    .song-title {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    .song-artist {
-      color: #888;
-      font-size: 0.9rem;
-    }
-
-    .spotify-search-empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: #666;
-    }
-
-    .spotify-search-empty i {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      color: #444;
     }
 
     /* Responsive Design */
@@ -665,36 +582,25 @@
           <label for="battleDescription">Description</label>
           <textarea id="battleDescription" name="battleDescription" rows="3" placeholder="Describe your battle challenge..."></textarea>
         </div>
-          <div class="form-group">
+        
+        <div class="form-group">
           <label>Choose Song</label>
-          <div class="spotify-search-container">
-            <div class="search-input-container">
-              <input type="text" id="spotifySearch" placeholder="Search for any song on Spotify..." oninput="searchSpotifySongs(this.value)">
-              <i class="fab fa-spotify spotify-icon"></i>
+          <div class="songs-grid">
+            <div class="song-option" onclick="selectSong('cwub1m1pq0c', 'Dynamite - BTS', this)">
+              <img src="/images/bts-dynamite.jpg" alt="BTS Dynamite">
+              <div>Dynamite - BTS</div>
             </div>
-            <div class="search-loading" id="searchLoading" style="display: none;">
-              <i class="fas fa-spinner fa-spin"></i> Searching Spotify...
+            <div class="song-option" onclick="selectSong('dsUXAEzaC3Q', 'Bad - Michael Jackson', this)">
+              <img src="/images/michael-jackson.jpg" alt="Michael Jackson Bad">
+              <div>Bad - Michael Jackson</div>
             </div>
-            <div class="spotify-results" id="spotifyResults">
-              <!-- Default popular songs -->
-              <div class="songs-grid" id="defaultSongs">
-                <div class="song-option" onclick="selectSong('cwub1m1pq0c', 'Dynamite - BTS', '/images/bts-dynamite.jpg', this)">
-                  <img src="/images/bts-dynamite.jpg" alt="BTS Dynamite">
-                  <div>Dynamite - BTS</div>
-                </div>
-                <div class="song-option" onclick="selectSong('dsUXAEzaC3Q', 'Bad - Michael Jackson', '/images/michael-jackson.jpg', this)">
-                  <img src="/images/michael-jackson.jpg" alt="Michael Jackson Bad">
-                  <div>Bad - Michael Jackson</div>
-                </div>
-                <div class="song-option" onclick="selectSong('BQnS5LUGbCQ', 'Savage - Megan Thee Stallion', '/images/megan-savage.jpg', this)">
-                  <img src="/images/megan-savage.jpg" alt="Megan Thee Stallion Savage">
-                  <div>Savage - Megan Thee Stallion</div>
-                </div>
-                <div class="song-option" onclick="selectSong('VUAMlyDtbPQ', 'Level Up - Ciara', '/images/ciara-level-up.jpg', this)">
-                  <img src="/images/ciara-level-up.jpg" alt="Ciara Level Up">
-                  <div>Level Up - Ciara</div>
-                </div>
-              </div>
+            <div class="song-option" onclick="selectSong('BQnS5LUGbCQ', 'Savage - Megan Thee Stallion', this)">
+              <img src="/images/megan-savage.jpg" alt="Megan Thee Stallion Savage">
+              <div>Savage - Megan Thee Stallion</div>
+            </div>
+            <div class="song-option" onclick="selectSong('VUAMlyDtbPQ', 'Level Up - Ciara', this)">
+              <img src="/images/ciara-level-up.jpg" alt="Ciara Level Up">
+              <div>Level Up - Ciara</div>
             </div>
           </div>
         </div>
@@ -732,20 +638,17 @@
     function openCreateBattleModal() {
       document.getElementById('createBattleModal').style.display = 'flex';
     }
-      function closeCreateBattleModal() {
+    
+    function closeCreateBattleModal() {
       document.getElementById('createBattleModal').style.display = 'none';
       selectedSong = null;
-      
-      // Clear search input and show default songs
-      document.getElementById('spotifySearch').value = '';
-      showDefaultSongs();
-      
       // Clear selected song styling
       document.querySelectorAll('.song-option').forEach(option => {
         option.classList.remove('selected');
       });
     }
-      function selectSong(videoId, title, image, element) {
+    
+    function selectSong(videoId, title, element) {
       // Clear previous selections
       document.querySelectorAll('.song-option').forEach(option => {
         option.classList.remove('selected');
@@ -753,132 +656,7 @@
       
       // Select current song
       element.classList.add('selected');
-      selectedSong = { videoId, title, image };
-    }
-
-    // Spotify Search Functions
-    let searchTimeout;
-    let searchCache = {};
-
-    function searchSpotifySongs(query) {
-      // Clear existing timeout
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-
-      // If query is empty, show default songs
-      if (!query.trim()) {
-        showDefaultSongs();
-        return;
-      }
-
-      // Show loading state
-      document.getElementById('searchLoading').style.display = 'block';
-      document.getElementById('spotifyResults').innerHTML = '';
-
-      // Debounce search
-      searchTimeout = setTimeout(async () => {
-        try {
-          // Check cache first
-          if (searchCache[query]) {
-            displaySearchResults(searchCache[query], query);
-            return;
-          }
-
-          const response = await fetch(`/spotify/search?q=${encodeURIComponent(query)}`);
-          const data = await response.json();
-
-          if (data.success) {
-            searchCache[query] = data.tracks;
-            displaySearchResults(data.tracks, query);
-          } else {
-            showSearchError();
-          }
-        } catch (error) {
-          console.error('Search error:', error);
-          showSearchError();
-        } finally {
-          document.getElementById('searchLoading').style.display = 'none';
-        }
-      }, 500);
-    }
-
-    function displaySearchResults(tracks, query) {
-      const resultsContainer = document.getElementById('spotifyResults');
-      
-      if (!tracks || tracks.length === 0) {
-        resultsContainer.innerHTML = `
-          <div class="spotify-search-empty">
-            <i class="fas fa-search"></i>
-            <div>No results found for "${query}"</div>
-            <div style="font-size: 0.8rem; margin-top: 8px;">Try a different search term</div>
-          </div>
-        `;
-        return;
-      }
-
-      let html = `<div class="search-results-header">Found ${tracks.length} songs on Spotify</div>`;
-        tracks.forEach(track => {
-        // Use YouTube search as fallback for videoId (simplified approach)
-        const videoId = generateVideoId(track.name, track.artist);
-        const image = track.image || '/images/default-song.jpg';
-        const title = `${track.name} - ${track.artist}`;
-        
-        html += `
-          <div class="song-option spotify-track" onclick="selectSong('${videoId}', '${title}', '${image}', this)">
-            <img src="${image}" alt="${track.name}" onerror="this.src='/images/default-song.jpg'">
-            <div class="song-info">
-              <div class="song-title">${track.name}</div>
-              <div class="song-artist">${track.artist}</div>
-            </div>
-          </div>
-        `;
-      });
-
-      resultsContainer.innerHTML = html;
-    }
-
-    function showDefaultSongs() {
-      document.getElementById('spotifyResults').innerHTML = `
-        <div class="songs-grid" id="defaultSongs">
-          <div class="song-option" onclick="selectSong('cwub1m1pq0c', 'Dynamite - BTS', '/images/bts-dynamite.jpg', this)">
-            <img src="/images/bts-dynamite.jpg" alt="BTS Dynamite">
-            <div>Dynamite - BTS</div>
-          </div>
-          <div class="song-option" onclick="selectSong('dsUXAEzaC3Q', 'Bad - Michael Jackson', '/images/michael-jackson.jpg', this)">
-            <img src="/images/michael-jackson.jpg" alt="Michael Jackson Bad">
-            <div>Bad - Michael Jackson</div>
-          </div>
-          <div class="song-option" onclick="selectSong('BQnS5LUGbCQ', 'Savage - Megan Thee Stallion', '/images/megan-savage.jpg', this)">
-            <img src="/images/megan-savage.jpg" alt="Megan Thee Stallion Savage">
-            <div>Savage - Megan Thee Stallion</div>
-          </div>
-          <div class="song-option" onclick="selectSong('VUAMlyDtbPQ', 'Level Up - Ciara', '/images/ciara-level-up.jpg', this)">
-            <img src="/images/ciara-level-up.jpg" alt="Ciara Level Up">
-            <div>Level Up - Ciara</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function showSearchError() {
-      document.getElementById('spotifyResults').innerHTML = `
-        <div class="spotify-search-empty">
-          <i class="fas fa-exclamation-triangle"></i>
-          <div>Error searching Spotify</div>
-          <div style="font-size: 0.8rem; margin-top: 8px;">Please try again later</div>
-        </div>
-      `;
-    }    function generateVideoId(songName, artistName) {
-      // Simple hash function to generate consistent IDs
-      const str = `${songName} ${artistName}`.toLowerCase();
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-      }
-      return Math.abs(hash).toString(36).substring(0, 11);
+      selectedSong = { videoId, title };
     }
     
     function submitBattle(event) {
